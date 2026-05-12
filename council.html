@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CIP: Council Innovation Platform | Council Analysis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="min-h-screen" data-page="detail">
+  <!-- Global Loading Overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#050505] transition-opacity duration-700">
+    <div class="w-64 space-y-6 text-center">
+      <div class="h-12 w-12 rounded-2xl grid place-items-center app-logo mx-auto mb-6 shadow-2xl shadow-white/5 border-white/10">
+        <span class="text-xs font-black text-white tracking-tighter">CIP</span>
+      </div>
+      <div class="space-y-2">
+        <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Analyzing Council</h2>
+        <div class="h-[2px] w-full bg-white/5 rounded-full overflow-hidden">
+          <div id="loadingProgress" class="h-full bg-white transition-all duration-500 ease-out" style="width: 0%"></div>
+        </div>
+        <p id="loadingStatus" class="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] animate-pulse">Syncing Deep Data...</p>
+      </div>
+    </div>
+  </div>
+
+  <header class="sticky top-0 z-40 border-b app-nav">
+    <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-xl grid place-items-center app-logo">
+          <span class="text-sm font-bold text-accent">CIP</span>
+        </div>
+        <div>
+          <p class="text-sm font-semibold tracking-wide">CIP: Council Deep Analysis</p>
+          <p class="text-xs text-muted">Teacher approvals, feedback loops, and media proofs</p>
+        </div>
+      </a>
+      <button id="themeToggle" class="rounded-lg border px-3 py-2 text-xs font-semibold transition hover:-translate-y-0.5 surface-strong border-theme">
+        Toggle Theme
+      </button>
+    </nav>
+  </header>
+
+  <main id="councilDetailPage" class="mx-auto max-w-7xl px-4 pb-16 pt-8 md:px-8">
+    <section class="detail-hero reveal rounded-2xl border border-theme px-6 py-8 md:px-8 md:py-10">
+      <div class="detail-hero-overlay"></div>
+      <div class="relative z-10">
+        <p class="text-xs uppercase tracking-[0.22em] text-muted">Council Intelligence Studio</p>
+        <div class="mt-3 flex flex-wrap items-start justify-between gap-4">
+          <div class="max-w-4xl">
+            <div class="mb-3 flex flex-wrap items-center gap-2">
+              <span id="themeChip" class="theme-chip"></span>
+              <span id="healthChip" class="theme-chip"></span>
+            </div>
+            <h1 id="detailCouncilName" class="text-3xl font-extrabold md:text-4xl"></h1>
+            <p id="detailMission" class="mt-4 text-sm md:text-base text-muted"></p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <a href="index.html#rankingList" class="rounded-lg border px-4 py-2 text-sm font-semibold border-theme surface-strong">Back to Rankings</a>
+            <a id="detailHomepageLink" class="rounded-lg px-4 py-2 text-sm font-semibold text-white btn-accent" href="#" target="_blank" rel="noopener">Council Homepage</a>
+          </div>
+        </div>
+        <div id="detailMetrics" class="mt-6 grid gap-3 sm:grid-cols-2 max-w-2xl"></div>
+      </div>
+    </section>
+
+    <section class="mt-8 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <article class="glass reveal rounded-2xl p-5 md:p-6">
+        <h2 class="text-xl font-semibold">Strategic Analysis</h2>
+        <p id="analysisSummary" class="mt-2 text-sm text-muted"></p>
+        <div class="mt-5 grid gap-3 md:grid-cols-3">
+          <div class="analysis-pod">
+            <p class="analysis-pod-title">Strength Signals</p>
+            <ul id="strengthList" class="mt-2 space-y-1 text-sm text-muted"></ul>
+          </div>
+          <div class="analysis-pod">
+            <p class="analysis-pod-title">Risk Watch</p>
+            <ul id="riskList" class="mt-2 space-y-1 text-sm text-muted"></ul>
+          </div>
+          <div class="analysis-pod">
+            <p class="analysis-pod-title">90-Day Focus</p>
+            <ul id="focusList" class="mt-2 space-y-1 text-sm text-muted"></ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="glass reveal rounded-2xl p-5 md:p-6">
+        <h2 class="text-xl font-semibold">Execution Timeline</h2>
+        <p class="mt-1 text-sm text-muted">How ideas progressed from proposal to delivery checkpoints.</p>
+        <div id="timelineRail" class="mt-5 space-y-3"></div>
+      </article>
+    </section>
+
+    <section class="mt-8 glass reveal rounded-2xl p-5 md:p-6">
+      <h2 class="text-xl font-semibold">Padlet Innovation Wall</h2>
+      <p class="mt-1 text-sm text-muted">Theme-matched board of initiatives, evidence snippets, and student voice highlights.</p>
+      <div id="padletBoard" style="display: contents;" class="mt-5 padlet-board"></div>
+    </section>
+
+
+
+    <section class="mt-8 glass reveal rounded-2xl p-5 md:p-6">
+      <h2 class="text-xl font-semibold">Initiative Calendar</h2>
+      <p class="mt-1 text-sm text-muted">Daily initiative log. Click a date tile to view activity details.</p>
+      <div id="calendarLegend" class="mt-4 flex flex-wrap gap-2 text-xs"></div>
+      <div id="calendarViewControls" class="mt-4"></div>
+      <div id="calendarYearControls" class="mt-3"></div>
+      <div id="calendarMonthControls" class="mt-3"></div>
+      <div id="initiativeCalendar" class="mt-4"></div>
+    </section>
+
+
+
+    <section id="detailNotFound" class="hidden mt-8 glass rounded-2xl p-6">
+      <h2 class="text-xl font-semibold">Council Not Found</h2>
+      <p class="mt-2 text-sm text-muted">The selected council was not found. Return to rankings and choose a valid council.</p>
+      <a href="index.html#rankingList" class="mt-4 inline-flex rounded-lg px-4 py-2 text-sm font-semibold text-white btn-accent">Back to Rankings</a>
+    </section>
+  </main>
+
+  <footer class="mx-auto max-w-7xl px-4 pb-10 md:px-8">
+    <div class="rounded-xl border border-theme px-4 py-3 text-sm text-muted surface-strong">
+      Powered by Inno-tech Council
+    </div>
+  </footer>
+
+  <dialog id="calendarDialog" class="calendar-dialog w-[92vw] max-w-xl rounded-2xl border p-0 border-theme surface-strong text-theme">
+    <form method="dialog" class="border-b px-5 py-4 border-theme">
+      <div class="flex items-center justify-between">
+        <h3 id="calendarDialogTitle" class="text-lg font-semibold">Initiative Log</h3>
+        <button class="rounded-lg border px-2 py-1 text-xs border-theme">Close</button>
+      </div>
+    </form>
+    <div id="calendarDialogBody" class="space-y-3 p-5 text-sm"></div>
+  </dialog>
+
+  <script src="script.js?v=score-v5"></script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strategic Execution Calendar | Council Innovation Platform</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="calendar.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="surface-dim text-theme antialiased" style="background: var(--cal-bg); color: var(--cal-text);">
+  
+  <nav class="cal-nav">
+    <div class="cal-nav-inner">
+      <a href="index.html" class="cal-logo">
+        <div class="cal-logo-box">C</div>
+        <span class="cal-logo-text">Council Hub</span>
+      </a>
+      <div class="cal-nav-links">
+        <a href="index.html" class="cal-nav-link">Dashboard</a>
+        <a href="calendar.html" class="cal-nav-link active">Calendar</a>
+      </div>
+      <div id="liveStatus" class="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-muted">
+        <div class="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
+        <span id="liveStatusText">Syncing...</span>
+      </div>
+    </div>
+  </nav>
+
+  <main id="globalCalendarPage" class="cal-container">
+    <header class="cal-header-section">
+      <p class="cal-title-tag">Master Execution Timeline</p>
+      <h1 class="cal-main-title">Strategic Calendar</h1>
+      <p class="cal-sub-title">A unified institutional view of all council initiatives, milestones, and delivery checkpoints across the organization.</p>
+    </header>
+
+    <section class="cal-controls">
+      <div id="councilLegend" class="cal-legend">
+        <!-- Legend items injected here -->
+      </div>
+      <div class="cal-filters">
+        <span class="filter-label">Filter:</span>
+        <div id="councilFilters" class="flex flex-wrap gap-2">
+          <button class="filter-chip active" data-filter="all">All Councils</button>
+          <!-- Per-council filters injected here -->
+        </div>
+      </div>
+    </section>
+
+    <div class="cal-grid-wrapper">
+      <div class="cal-glass-panel">
+        <div class="cal-month-header">
+          <div>
+            <h2 id="calendarMonth" class="cal-month-title">Month Year</h2>
+            <p id="calendarEventCount" class="cal-event-count">Syncing initiatives...</p>
+          </div>
+          <div class="cal-nav-buttons">
+            <button id="prevMonth" class="cal-btn">←</button>
+            <button id="todayBtn" class="cal-btn">Today</button>
+            <button id="nextMonth" class="cal-btn">→</button>
+          </div>
+        </div>
+
+        <div class="cal-grid">
+          <div class="cal-weekday">Sun</div>
+          <div class="cal-weekday">Mon</div>
+          <div class="cal-weekday">Tue</div>
+          <div class="cal-weekday">Wed</div>
+          <div class="cal-weekday">Thu</div>
+          <div class="cal-weekday">Fri</div>
+          <div class="cal-weekday">Sat</div>
+        </div>
+        <div id="calendarGrid" class="cal-grid">
+          <!-- Days injected here -->
+        </div>
+      </div>
+
+      <aside class="cal-sidebar">
+        <div class="cal-side-panel">
+          <h3 class="cal-side-title">Summary</h3>
+          <div id="monthSummary" class="space-y-1">
+            <!-- Summary injected here -->
+          </div>
+        </div>
+
+        <div class="cal-side-panel">
+          <h3 class="cal-side-title">Upcoming</h3>
+          <div id="upcomingList" class="space-y-4">
+            <!-- Upcoming cards injected here -->
+          </div>
+          <p id="noUpcoming" class="text-xs text-muted text-center py-4" style="display:none">No upcoming initiatives.</p>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="cal-footer">
+      <span>Powered by Innovation & Tech Council · Official Platform View</span>
+      <span>&copy; 2026 CIP Professional</span>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

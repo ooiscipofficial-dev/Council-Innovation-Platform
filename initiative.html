@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CIP: Initiative Deep Dive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="min-h-screen" data-page="initiative">
+  <!-- Global Loading Overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#050505] transition-opacity duration-700">
+    <div class="w-64 space-y-6 text-center">
+      <div class="h-12 w-12 rounded-2xl grid place-items-center app-logo mx-auto mb-6 shadow-2xl shadow-white/5 border-white/10">
+        <span class="text-xs font-black text-white tracking-tighter">CIP</span>
+      </div>
+      <div class="space-y-2">
+        <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Initiative Deep Dive</h2>
+        <div class="h-[2px] w-full bg-white/5 rounded-full overflow-hidden">
+          <div id="loadingProgress" class="h-full bg-white transition-all duration-500 ease-out" style="width: 0%"></div>
+        </div>
+        <p id="loadingStatus" class="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] animate-pulse">Fetching Execution Details...</p>
+      </div>
+    </div>
+  </div>
+
+  <header class="sticky top-0 z-40 border-b app-nav">
+    <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
+      <a href="index.html#rankingList" class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-xl grid place-items-center app-logo">
+          <span class="text-sm font-bold text-accent">CIP</span>
+        </div>
+        <div>
+          <p class="text-sm font-semibold tracking-wide">Initiative Deep Dive</p>
+          <p class="text-xs text-muted">Leadership, execution detail, and contributor impact</p>
+        </div>
+      </a>
+      <button id="themeToggle" class="rounded-lg border px-3 py-2 text-xs font-semibold transition hover:-translate-y-0.5 surface-strong border-theme">
+        Toggle Theme
+      </button>
+    </nav>
+  </header>
+
+  <main id="initiativePage" class="mx-auto max-w-6xl px-4 pb-16 pt-8 md:px-8">
+    <section class="detail-hero reveal rounded-2xl border border-theme px-6 py-8 md:px-8 md:py-10">
+      <div class="detail-hero-overlay"></div>
+      <div class="relative z-10">
+        <p class="text-xs uppercase tracking-[0.22em] text-muted">Initiative Intelligence</p>
+        <h1 id="initiativeTitle" class="mt-3 text-3xl font-extrabold md:text-4xl"></h1>
+        <p id="initiativeSummary" class="mt-3 max-w-4xl text-sm text-muted md:text-base"></p>
+        <div class="mt-5 flex flex-wrap gap-2">
+          <a id="initiativeBackToCouncil" href="council.html" class="rounded-lg border px-4 py-2 text-sm font-semibold border-theme surface-strong">Back to Council</a>
+          <a href="index.html#rankingList" class="rounded-lg border px-4 py-2 text-sm font-semibold border-theme surface-strong">Back to Rankings</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-8 grid gap-6 lg:grid-cols-2">
+      <article class="glass reveal rounded-2xl p-5 md:p-6">
+        <h2 class="text-xl font-semibold">Leadership Team</h2>
+        <div id="initiativeLeadBlock" class="mt-4"></div>
+      </article>
+      <article class="glass reveal rounded-2xl p-5 md:p-6">
+        <h2 class="text-xl font-semibold">Contributors</h2>
+        <div id="initiativeContributors" class="mt-4 grid gap-2 sm:grid-cols-2"></div>
+      </article>
+    </section>
+
+    <section class="mt-8 glass reveal rounded-2xl p-5 md:p-6">
+      <h2 class="text-xl font-semibold">Execution Breakdown</h2>
+      <div id="initiativeExecution" class="mt-4 space-y-3"></div>
+    </section>
+
+    <section id="initiativeNotFound" class="hidden mt-8 glass rounded-2xl p-6">
+      <h2 class="text-xl font-semibold">Initiative Not Found</h2>
+      <p class="mt-2 text-sm text-muted">The selected initiative does not exist for this council.</p>
+      <a href="index.html#rankingList" class="mt-4 inline-flex rounded-lg px-4 py-2 text-sm font-semibold text-white btn-accent">Back to Rankings</a>
+    </section>
+  </main>
+
+  <footer class="mx-auto max-w-6xl px-4 pb-10 md:px-8">
+    <div class="rounded-xl border border-theme px-4 py-3 text-sm text-muted surface-strong">
+      Powered by Inno-tech Council
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
