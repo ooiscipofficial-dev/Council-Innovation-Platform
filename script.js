@@ -741,7 +741,7 @@ function initCouncilDetailPage() {
         ...council.initiatives.map((initiative) => ({ title: initiative, body: "Student-led initiative currently tracked in council operations.", type: "Initiative" })),
         ...council.approved.map((item) => ({ title: item.title, body: `Teacher-approved on ${formatDate(item.dateApproved)}. ${item.rationale}`, type: "Approved" })),
         ...council.rejected.map((item) => ({ title: item.title, body: `Revision note: ${item.feedback}`, type: "Review" })),
-        ...((council.proofs.images || []).map((image) => ({ title: image.title, body: "Visual proof uploaded to council evidence vault.", type: "Proof" })))
+        
       ];
 
       padletBoard.innerHTML = notePool.slice(0, 12).map((note) => {
