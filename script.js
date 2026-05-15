@@ -10,7 +10,7 @@ const sharedProofVideos = [
 ];
 
 const API_BASE = "https://councilhub-backend.oois-cip-official.workers.dev/api";
-const COUNCIL_CACHE_KEY = "cip_council_cache_v5";
+const COUNCIL_CACHE_KEY = "cip_council_cache_v6";
 
 let councilData = {
   liveStatus: {
@@ -49,11 +49,25 @@ function calculateImpactScore(data) {
   return Math.min(100, Math.max(0, Math.round(score)));
 }
 
+function stripSensitiveCouncilFields(data) {
+  if (!data || typeof data !== "object") return data;
+  if (Array.isArray(data)) {
+    return data.map(stripSensitiveCouncilFields);
+  }
+
+  const cleaned = {};
+  Object.entries(data).forEach(([key, value]) => {
+    if (key === "credentials" || key === "password" || key === "username") return;
+    cleaned[key] = stripSensitiveCouncilFields(value);
+  });
+  return cleaned;
+}
+
 async function enrichCouncilData() {
   const loadingOverlay = document.getElementById("loadingOverlay");
   const loadingProgress = document.getElementById("loadingProgress");
   const loadingStatus = document.getElementById("loadingStatus");
-  ["cip_council_cache", "cip_council_cache_v2", "cip_council_cache_v3", "cip_council_cache_v4"]
+  ["cip_council_cache", "cip_council_cache_v2", "cip_council_cache_v3", "cip_council_cache_v4", "cip_council_cache_v5"]
     .forEach((key) => localStorage.removeItem(key));
 
   function updateLoading(percent, status) {
@@ -97,7 +111,7 @@ async function enrichCouncilData() {
     });
     if (!res.ok) throw new Error("Registry aggregate unreachable");
     
-    const fullData = await res.json();
+    const fullData = stripSensitiveCouncilFields(await res.json());
     const ids = Object.keys(fullData);
     
     updateLoading(60, "Processing institutional data...");
