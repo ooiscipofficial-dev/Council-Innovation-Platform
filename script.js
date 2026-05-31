@@ -1156,26 +1156,7 @@ function initInitiativePage() {
   document.getElementById("initiativeSummary").textContent = initiative.summary;
   document.getElementById("initiativeBackToCouncil").href = `council.html?council=${encodeURIComponent(councilSlug)}`;
 
-  const lead = initiative.lead || {};
-  const leadIsCouncil = lead.type === "council";
-  const leadStudents = Array.isArray(lead.mainStudents) ? lead.mainStudents.filter((student) => student && student.name) : [];
-  document.getElementById("initiativeLeadBlock").innerHTML = `
-    <article class="initiative-person">
-      <p class="text-xs text-muted">Initiative Lead</p>
-      <h3 class="mt-1 text-lg font-semibold">${leadIsCouncil ? (lead.councilName || "Council Lead") : (lead.name || "Pending")}</h3>
-      <p class="text-sm text-muted">${leadIsCouncil ? (lead.role || "Council Initiative Lead") : [lead.role, lead.class].filter(Boolean).join(" - ")}</p>
-      ${leadStudents.length ? `
-        <div class="mt-3 grid gap-2 sm:grid-cols-2">
-          ${leadStudents.map((student) => `
-            <div class="rounded-lg border border-theme/40 p-3">
-              <h4 class="font-semibold">${student.name}</h4>
-              <p class="text-sm text-muted">${[student.role || "Main Student", student.class, student.section ? ` ${student.section}` : ""].filter(Boolean).join(" - ")}</p>
-            </div>
-          `).join("")}
-        </div>
-      ` : ""}
-    </article>
-  `;
+  document.getElementById("initiativeLeadBlock").innerHTML = renderLeadCard(initiative);
 
   document.getElementById("initiativeContributors").innerHTML = initiative.contributors.map((person) => `
     <article class="initiative-person">
@@ -1198,6 +1179,41 @@ function initInitiativePage() {
   }).join("");
 
   initRevealObserver();
+}
+
+function renderLeadCard(initiative) {
+  const lead = initiative.lead || {};
+  const leadIsCouncil = lead.type === "council";
+  const leadStudents = Array.isArray(lead.mainStudents) ? lead.mainStudents.filter((student) => student && student.name) : [];
+  const leadTitle = leadIsCouncil ? (lead.councilName || "Council Lead") : (lead.name || "Pending");
+  const leadSubtitle = leadIsCouncil ? (lead.role || "Council Initiative Lead") : [lead.role, lead.class].filter(Boolean).join(" &middot; ");
+  const icon = leadIsCouncil ? "&#128101;" : (leadTitle.charAt(0) || "L");
+
+  return `
+    <article class="initiative-lead-panel">
+      <p class="initiative-lead-label">Initiative Lead</p>
+      <div class="initiative-lead-header">
+        <div class="initiative-lead-avatar" aria-hidden="true">${icon}</div>
+        <div class="min-w-0">
+          <h3 class="initiative-lead-title">${leadTitle}</h3>
+          <p class="initiative-lead-subtitle">${leadSubtitle}</p>
+        </div>
+      </div>
+      ${leadStudents.length ? `
+        <div class="initiative-lead-students">
+          ${leadStudents.map((student) => `
+            <div class="initiative-lead-student">
+              <div class="initiative-student-avatar" aria-hidden="true">${student.name?.charAt(0) || "S"}</div>
+              <div class="min-w-0">
+                <h4 class="initiative-student-name">${student.name}</h4>
+                <p class="initiative-student-meta">${[student.role || "Main Student Lead", student.class, student.section].filter(Boolean).join(" &middot; ")}</p>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      ` : ""}
+    </article>
+  `;
 }
 
 const feedMessages = [];

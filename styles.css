@@ -730,6 +730,80 @@ body {
   background: color-mix(in srgb, var(--surface) 75%, transparent);
 }
 
+.initiative-lead-panel {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.initiative-lead-label {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.initiative-lead-header,
+.initiative-lead-student {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.initiative-lead-avatar,
+.initiative-student-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: #1c1c1c;
+  color: #f5f5f5;
+  font-weight: 800;
+}
+
+.initiative-lead-avatar {
+  width: 2.55rem;
+  height: 2.55rem;
+  font-size: 1rem;
+}
+
+.initiative-lead-title,
+.initiative-student-name {
+  margin: 0;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.initiative-lead-subtitle,
+.initiative-student-meta {
+  margin: 0.1rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.initiative-lead-students {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.initiative-lead-student {
+  min-height: 3.35rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  background: rgba(0, 0, 0, 0.08);
+  padding: 0.55rem 0.65rem;
+}
+
+.initiative-student-avatar {
+  width: 1.9rem;
+  height: 1.9rem;
+  font-size: 0.78rem;
+}
+
 .proof-tile {
   position: relative;
 }
