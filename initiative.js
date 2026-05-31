@@ -30,12 +30,24 @@ function initInitiativePage() {
   document.getElementById("initiativeSummary").textContent = initiative.summary;
   document.getElementById("initiativeBackToCouncil").href = `council.html?council=${encodeURIComponent(councilSlug)}`;
 
-  const lead = initiative.lead;
+  const lead = initiative.lead || {};
+  const leadIsCouncil = lead.type === "council";
+  const leadStudents = Array.isArray(lead.mainStudents) ? lead.mainStudents.filter((student) => student && student.name) : [];
   document.getElementById("initiativeLeadBlock").innerHTML = `
     <article class="initiative-person">
       <p class="text-xs text-muted">Initiative Lead</p>
-      <h3 class="mt-1 text-lg font-semibold">${lead.name}</h3>
-      <p class="text-sm text-muted">${lead.role} · ${lead.class}</p>
+      <h3 class="mt-1 text-lg font-semibold">${leadIsCouncil ? (lead.councilName || "Council Lead") : (lead.name || "Pending")}</h3>
+      <p class="text-sm text-muted">${leadIsCouncil ? (lead.role || "Council Initiative Lead") : [lead.role, lead.class].filter(Boolean).join(" - ")}</p>
+      ${leadStudents.length ? `
+        <div class="mt-3 grid gap-2 sm:grid-cols-2">
+          ${leadStudents.map((student) => `
+            <div class="rounded-lg border border-theme/40 p-3">
+              <h4 class="font-semibold">${student.name}</h4>
+              <p class="text-sm text-muted">${[student.role || "Main Student", student.class, student.section ? `Sec. ${student.section}` : ""].filter(Boolean).join(" - ")}</p>
+            </div>
+          `).join("")}
+        </div>
+      ` : ""}
     </article>
   `;
 
