@@ -43,7 +43,7 @@ function initInitiativePage() {
           ${leadStudents.map((student) => `
             <div class="rounded-lg border border-theme/40 p-3">
               <h4 class="font-semibold">${student.name}</h4>
-              <p class="text-sm text-muted">${[student.role || "Main Student", student.class, student.section ? `Sec. ${student.section}` : ""].filter(Boolean).join(" - ")}</p>
+              <p class="text-sm text-muted">${[student.role || "Main Student", student.class, student.section ? ` ${student.section}` : ""].filter(Boolean).join(" - ")}</p>
             </div>
           `).join("")}
         </div>
