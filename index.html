@@ -1,208 +1,419 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CIP: Council Innovation Platform</title>
+  <title>GIC Registration System</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <link rel="stylesheet" href="styles.css" />
-</head>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-<body class="min-h-screen">
-  <!-- Global Loading Overlay -->
-  <div id="loadingOverlay" class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#050505] transition-opacity duration-700">
-    <div class="w-64 space-y-6 text-center">
-      <div class="h-12 w-12 rounded-2xl grid place-items-center app-logo mx-auto mb-6 shadow-2xl shadow-white/5 border-white/10">
-        <span class="text-xs font-black text-white tracking-tighter">CIP</span>
-      </div>
-      <div class="space-y-2">
-        <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Initializing Platform</h2>
-        <div class="h-[2px] w-full bg-white/5 rounded-full overflow-hidden">
-          <div id="loadingProgress" class="h-full bg-white transition-all duration-500 ease-out" style="width: 0%"></div>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: '#0f172a',
+            accent: '#2563eb',
+            surface: '#ffffff',
+            background: '#f8fafc',
+            border: '#e2e8f0',
+            muted: '#64748b'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body { background-color: #f8fafc; color: #0f172a; -webkit-font-smoothing: antialiased; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: all 0.2s ease; }
+    .input-field { width: 100%; padding: 0.625rem 0.875rem; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; color: #0f172a; }
+    .input-field:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.625rem 1.25rem; font-weight: 500; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: #0f172a; color: #ffffff; border: 1px solid #0f172a; }
+    .btn-primary:hover { background: #1e293b; }
+    .btn-secondary { background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; }
+    .btn-secondary:hover { background: #f1f5f9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .role-card { cursor: pointer; }
+    .role-card:hover { border-color: #94a3b8; transform: translateY(-2px); }
+    .role-card.selected { border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 0 1px #2563eb; }
+    .form-label { display: block; font-size: 0.875rem; font-weight: 500; color: #334155; margin-bottom: 0.375rem; }
+    .nav-bar { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid #e2e8f0; }
+    .toast { position: fixed; top: 1rem; right: 1rem; padding: 1rem 1.25rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 0.75rem; z-index: 50; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .section { display: none; }
+    .section.active { display: block; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav-bar sticky top-0 z-40 no-print">
+    <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="location.reload()">
+        <div class="w-8 h-8 bg-primary text-white rounded-md flex items-center justify-center">
+          <i data-lucide="globe" class="w-5 h-5"></i>
         </div>
-        <p id="loadingStatus" class="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] animate-pulse">Establishing Link...</p>
+        <div>
+          <h1 class="font-bold text-primary leading-tight">GIC</h1>
+          <p class="text-xs text-muted">Registration System</p>
+        </div>
+      </div>
+      <div class="flex gap-4">
+        <button class="text-sm font-medium text-muted hover:text-primary transition-colors" onclick="location.reload()">Register</button>
+        <a href="admin.html" class="text-sm font-medium text-muted hover:text-primary transition-colors">Admin</a>
       </div>
     </div>
-  </div>
+  </nav>
 
-  <header class="sticky top-0 z-40 border-b app-nav">
-    <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
-      <div class="flex items-center gap-3">
-        <div class="h-9 w-9 rounded-xl grid place-items-center app-logo">
-          <span class="text-sm font-bold text-accent">CIP</span>
-        </div>
-        <div>
-          <p class="text-sm font-semibold tracking-wide">CIP: Council Innovation Platform</p>
-          <div class="flex items-center gap-2 text-xs text-muted">
-            <span class="live-dot"></span>
-            <span id="liveStatusText">Live Status: Sync healthy</span>
-          </div>
-        </div>
+  <main class="max-w-3xl mx-auto px-4 py-12">
+    
+    <!-- HOME SECTION -->
+    <div id="sec-home" class="section active no-print">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-primary mb-4">Global Innovation Challenge</h2>
+        <p class="text-muted max-w-xl mx-auto">Register your team for the 2025-2026 academic year. Submit your SDG-aligned project for faculty evaluation.</p>
       </div>
-      <div class="hidden items-center gap-4 text-sm md:flex">
-        <a href="#academic-councils" class="transition hover:opacity-80 text-muted">Academic Councils</a>
-        <a href="#house-councils" class="transition hover:opacity-80 text-muted">House Councils</a>
-        <button id="themeToggle"
-          class="rounded-lg border px-3 py-2 text-xs font-semibold transition hover:-translate-y-0.5 surface-strong border-theme">
-          Toggle Theme
-        </button>
-      </div>
-      <button id="mobileThemeToggle"
-        class="rounded-lg border px-3 py-2 text-xs font-semibold md:hidden surface-strong border-theme">
-        Theme
-      </button>
-    </nav>
-  </header>
 
-  <main class="mx-auto max-w-7xl px-4 pb-16 pt-6 md:px-8 md:pt-10">
-
-    <section id="dashboardView">
-
-      <section
-        class="relative overflow-hidden rounded-2xl border px-6 pb-10 pt-12 md:px-10 md:pt-16 hero-shell border-theme">
-        <div class="hero-scan"></div>
-        <div class="hero-grid absolute inset-0"></div>
-        <canvas id="heroCanvas" class="hero-canvas absolute inset-0 h-full w-full"></canvas>
-        <div>
-
-          <span id="academic-year" class="section-eyebrow">
-          </span>
-        </div>
-        <div class="relative z-10 max-w-4xl">
-          <p class="text-xs font-semibold uppercase tracking-[0.24em] text-muted">Council Operating Console</p>
-          <h1 class="mt-3 text-3xl font-extrabold leading-tight md:text-5xl">CIP: Council Innovation Platform Dashboard
-          </h1>
-          <p class="mt-4 max-w-3xl text-sm md:text-base text-muted">
-            Unified visibility into active initiatives, delivery effort, approvals, and outcomes across academic and
-            house councils.
-          </p>
-          <div class="mt-8 grid max-w-3xl grid-cols-2 gap-3 md:grid-cols-4" id="heroStats"></div>
-        </div>
-        <br>
-        <div class="relative mt-12 overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl reveal">
-          <div class="flex items-center justify-between border-b border-white/10 px-6 py-4">
-            <div class="flex items-center gap-3">
-              <div class="h-2 w-2 rounded-full bg-accent animate-pulse"></div>
-              <h3 class="text-sm font-bold uppercase tracking-widest text-muted">Live Activity Feed</h3>
+      <!-- Step 1: Role Selection -->
+      <div id="step-1">
+        <h3 class="text-lg font-semibold mb-6 text-center">Choose your role</h3>
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+          <div class="card role-card p-6 text-center" id="role-leader">
+            <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i data-lucide="user-plus" class="w-6 h-6 text-slate-700"></i>
             </div>
-            <div class="text-[10px] font-medium text-muted/60">Real-time Updates</div>
+            <h4 class="font-semibold text-lg mb-2">Team Leader</h4>
+            <p class="text-sm text-muted">Create a new project entry and register your team.</p>
           </div>
-          <div id="activityFeed" class="max-h-[320px] overflow-y-auto p-4 space-y-3 custom-scrollbar">
-            <!-- Activity items will be injected here -->
-          </div>
-        </div>
-      </section>
-
-      <section class="mt-8">
-        <div class="glass reveal rounded-2xl p-5 md:p-6 text-center">
-          <h3 class="text-[10px] font-black uppercase tracking-[0.25em] text-accent mb-2">Master Timeline</h3>
-          <h2 class="text-xl font-bold">Strategic Execution Calendar</h2>
-          <p class="mt-2 text-sm text-muted">A dedicated grid view of all council initiatives and delivery checkpoints.</p>
-          <a href="calendar.html" class="mt-6 inline-block rounded-xl btn-accent px-8 py-2.5 text-sm font-bold text-white transition-all hover:scale-105 active:scale-95 shadow-lg shadow-accent/20">Open Full Calendar</a>
-        </div>
-      </section>
-
-      <section class="mt-8">
-        <div class="glass reveal rounded-2xl p-5 md:p-6">
-          <h2 class="text-lg font-semibold">Council Rankings</h2>
-          <p class="mt-1 text-sm text-muted">Click a rank to open the separate deep analysis page for that council.</p>
-          <ol id="rankingList" class="mt-4 space-y-2" style="height: auto"></ol>
-        </div>
-      </section>
-
-      <section id="academic-councils" class="mt-12">
-        <div class="mb-5 flex items-end justify-between">
-          <div>
-            <h2 class="text-2xl font-bold section-title-academic">Academic & Activity Councils</h2>
-            <p class="mt-1 text-sm text-muted">Operational councils focused on learning, events, student welfare, and
-              systems.</p>
+          
+          <div class="card role-card p-6 text-center" id="role-member">
+            <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i data-lucide="users" class="w-6 h-6 text-slate-700"></i>
+            </div>
+            <h4 class="font-semibold text-lg mb-2">Team Member</h4>
+            <p class="text-sm text-muted">Search for an existing team and join it.</p>
           </div>
         </div>
-        <div id="academicGrid" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"></div>
-      </section>
-
-      <section id="house-councils" class="mt-12">
-        <div class="mb-5 flex items-end justify-between">
-          <div>
-            <h2 class="text-2xl font-bold section-title-house">House Councils</h2>
-            <p class="mt-1 text-sm text-muted">Identity-driven councils with stronger visual distinction and house
-              character.</p>
-          </div>
+        <div class="text-center">
+          <button class="btn btn-primary px-8" id="btn-next" disabled>Continue</button>
         </div>
-        <div id="houseGrid" class="grid gap-5 md:grid-cols-2"></div>
-      </section>
-    </section>
+      </div>
+
+      <!-- Step 2: Forms -->
+      <div id="step-2" class="hidden">
+        <button class="text-sm text-muted hover:text-primary mb-6 flex items-center gap-1" id="btn-back">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
+        </button>
+
+        <!-- Leader Form -->
+        <div id="form-leader" class="card p-6 md:p-8 hidden">
+          <h3 class="text-xl font-bold mb-6 border-b pb-4">Team Leader Registration</h3>
+          <form id="lf" class="space-y-5">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">Full Name *</label>
+                <input type="text" id="l-name" class="input-field" required>
+              </div>
+              <div>
+                <label class="form-label">Class &amp; Section *</label>
+                <input type="text" id="l-cls" class="input-field" required>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">Category *</label>
+                <select id="l-cat" class="input-field" required>
+                  <option value="">Select...</option>
+                  <option>Primary</option>
+                  <option>High School</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Team Name *</label>
+                <input type="text" id="l-team" class="input-field" required>
+              </div>
+            </div>
+            <div>
+              <label class="form-label">SDG Goal *</label>
+              <select id="l-sdg" class="input-field" required>
+                <option value="">Select SDG...</option>
+                <option>SDG 1: No Poverty</option>
+                <option>SDG 2: Zero Hunger</option>
+                <option>SDG 3: Good Health & Well-being</option>
+                <option>SDG 4: Quality Education</option>
+                <option>SDG 5: Gender Equality</option>
+                <option>SDG 6: Clean Water & Sanitation</option>
+                <option>SDG 7: Affordable & Clean Energy</option>
+                <option>SDG 8: Decent Work & Economic Growth</option>
+                <option>SDG 9: Industry, Innovation & Infrastructure</option>
+                <option>SDG 10: Reduced Inequalities</option>
+                <option>SDG 11: Sustainable Cities & Communities</option>
+                <option>SDG 12: Responsible Consumption & Production</option>
+                <option>SDG 13: Climate Action</option>
+                <option>SDG 14: Life Below Water</option>
+                <option>SDG 15: Life on Land</option>
+                <option>SDG 16: Peace, Justice & Strong Institutions</option>
+                <option>SDG 17: Partnerships for the Goals</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Project Brief *</label>
+              <textarea id="l-brief" class="input-field" rows="3" required></textarea>
+            </div>
+            <div>
+              <label class="form-label">Prototype Plan *</label>
+              <textarea id="l-proto" class="input-field" rows="3" required></textarea>
+            </div>
+            <div>
+              <label class="form-label">Past Achievements (Optional)</label>
+              <textarea id="l-ach" class="input-field" rows="2"></textarea>
+            </div>
+            <div class="pt-4 flex justify-end gap-3 border-t mt-6">
+              <button type="button" class="btn btn-secondary" id="lf-cancel">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="lf-submit">Register Team</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Member Form -->
+        <div id="form-member" class="card p-6 md:p-8 hidden">
+          <h3 class="text-xl font-bold mb-6 border-b pb-4">Team Member Registration</h3>
+          <form id="mf" class="space-y-5">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">Full Name *</label>
+                <input type="text" id="m-name" class="input-field" required>
+              </div>
+              <div>
+                <label class="form-label">Class &amp; Section *</label>
+                <input type="text" id="m-cls" class="input-field" required>
+              </div>
+            </div>
+            <div>
+              <label class="form-label">Category *</label>
+              <select id="m-cat" class="input-field" required>
+                <option value="">Select...</option>
+                <option>Primary</option>
+                <option>High School</option>
+              </select>
+            </div>
+            <div class="relative">
+              <label class="form-label">Find Team *</label>
+              <input type="text" id="m-search" class="input-field" placeholder="Search team or leader...">
+              <div id="search-results" class="absolute z-10 w-full mt-1 border border-slate-200 rounded-md hidden max-h-48 overflow-y-auto bg-white shadow-lg"></div>
+              <div id="selected-team" class="mt-2 p-3 bg-slate-50 border rounded-md hidden flex justify-between items-center">
+                <div>
+                  <div class="font-semibold text-sm" id="st-name"></div>
+                  <div class="text-xs text-muted" id="st-info"></div>
+                </div>
+                <button type="button" id="st-clear" class="text-slate-400 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+              </div>
+            </div>
+            <div>
+              <label class="form-label">Past Achievements (Optional)</label>
+              <textarea id="m-ach" class="input-field" rows="2"></textarea>
+            </div>
+            <div class="pt-4 flex justify-end gap-3 border-t mt-6">
+              <button type="button" class="btn btn-secondary" id="mf-cancel">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="mf-submit">Join Team</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Step 3: Success -->
+      <div id="step-3" class="hidden text-center py-12">
+        <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="check" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-2xl font-bold mb-2">Success!</h3>
+        <p class="text-muted mb-8">Your registration has been recorded securely in the database.</p>
+        <button class="btn btn-secondary" onclick="location.reload()">Register Another</button>
+      </div>
+    </div>
   </main>
 
-  <footer class="mx-auto max-w-7xl px-4 pb-10 md:px-8">
-    <div class="rounded-xl border border-theme px-4 py-3 text-sm text-muted surface-strong">
-      Powered by Inno-tech Council
-    </div>
-  </footer>
+  <div id="toast-container" class="no-print"></div>
 
-  <dialog id="activityDialog" class="w-[92vw] max-w-lg rounded-2xl border p-0 border-white/10 bg-[#0a0a0a]/90 backdrop-blur-xl text-white shadow-2xl">
-    <div class="border-b border-white/10 px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div id="activityIcon" class="h-8 w-8 rounded-lg flex items-center justify-center text-lg">★</div>
-        <div>
-          <p id="activityLabel" class="text-[9px] font-black uppercase tracking-widest text-muted">Initiative</p>
-          <h3 id="activityTitle" class="text-sm font-bold">Initiative Title</h3>
-        </div>
-      </div>
-      <form method="dialog">
-        <button class="text-muted hover:text-white transition-colors">✕</button>
-      </form>
-    </div>
-    <div class="p-6">
-      <div id="activityDetailContent" class="space-y-4">
-        <div>
-          <p class="text-[10px] font-bold uppercase tracking-widest text-muted mb-2">Strategic Note</p>
-          <p id="activityNote" class="text-sm text-white/80 leading-relaxed">Detailed information about this event...</p>
-        </div>
-        <div class="flex items-center justify-between pt-4 border-t border-white/5">
-          <div>
-            <p class="text-[10px] font-bold uppercase tracking-widest text-muted">Timeline</p>
-            <p id="activityDate" class="text-sm font-semibold text-accent">May 10, 2026</p>
+  <script>
+    lucide.createIcons();
+
+    function toast(msg, type='success') {
+      const t = document.createElement('div');
+      t.className = 'toast border-l-4 ' + (type==='success'?'border-l-green-500':'border-l-red-500');
+      t.innerHTML = `<span class="font-medium text-sm">${msg}</span>`;
+      document.getElementById('toast-container').appendChild(t);
+      setTimeout(() => { t.style.opacity=0; setTimeout(()=>t.remove(),300); }, 3000);
+    }
+  </script>
+
+  <!-- FIREBASE MODULE -->
+  <script type="module">
+    import { db } from './firebase-config.js';
+    import { collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+    const $ = id => document.getElementById(id);
+    let selectedRole = null;
+    let selectedTeamId = null;
+    let teamsList = [];
+
+    // Role Selection
+    $('role-leader').addEventListener('click', () => {
+      selectedRole = 'leader';
+      $('role-leader').classList.add('selected');
+      $('role-member').classList.remove('selected');
+      $('btn-next').disabled = false;
+    });
+
+    $('role-member').addEventListener('click', () => {
+      selectedRole = 'member';
+      $('role-member').classList.add('selected');
+      $('role-leader').classList.remove('selected');
+      $('btn-next').disabled = false;
+    });
+
+    $('btn-next').addEventListener('click', () => {
+      $('step-1').classList.add('hidden');
+      $('step-2').classList.remove('hidden');
+      if(selectedRole === 'leader') {
+        $('form-leader').classList.remove('hidden');
+        $('form-member').classList.add('hidden');
+      } else {
+        $('form-member').classList.remove('hidden');
+        $('form-leader').classList.add('hidden');
+      }
+    });
+
+    const backToRoles = () => {
+      $('step-2').classList.add('hidden');
+      $('step-1').classList.remove('hidden');
+    };
+    $('btn-back').addEventListener('click', backToRoles);
+    $('lf-cancel').addEventListener('click', backToRoles);
+    $('mf-cancel').addEventListener('click', backToRoles);
+
+    // Live sync teams for search
+    onSnapshot(collection(db, 'teams'), (snapshot) => {
+      teamsList = [];
+      snapshot.forEach(doc => {
+        teamsList.push({ id: doc.id, ...doc.data() });
+      });
+    });
+
+    // Member Search
+    $('m-search').addEventListener('keyup', (e) => {
+      const q = e.target.value.toLowerCase();
+      const res = $('search-results');
+      if(!q) { res.classList.add('hidden'); return; }
+      
+      const hits = teamsList.filter(t => t.teamName.toLowerCase().includes(q) || t.leaderName.toLowerCase().includes(q));
+      if(hits.length) {
+        res.innerHTML = hits.map(t => `
+          <div class="p-3 border-b hover:bg-slate-50 cursor-pointer text-sm search-item" data-id="${t.id}">
+            <div class="font-medium">${t.teamName}</div>
+            <div class="text-xs text-muted">Leader: ${t.leaderName} | ${t.category}</div>
           </div>
-          <a id="activityLink" href="#" class="rounded-xl bg-white/5 border border-white/10 px-4 py-2 text-xs font-bold hover:bg-white/10 transition-all">Open Council Page</a>
-        </div>
-      </div>
-    </div>
-  </dialog>
+        `).join('');
+        
+        document.querySelectorAll('.search-item').forEach(item => {
+          item.addEventListener('click', (ev) => {
+            const id = ev.currentTarget.dataset.id;
+            const t = teamsList.find(x => x.id === id);
+            selectedTeamId = id;
+            $('search-results').classList.add('hidden');
+            $('m-search').value = '';
+            $('m-search').parentElement.classList.add('hidden');
+            $('st-name').textContent = t.teamName;
+            $('st-info').textContent = 'Leader: ' + t.leaderName;
+            $('selected-team').classList.remove('hidden');
+          });
+        });
+      } else {
+        res.innerHTML = '<div class="p-3 text-sm text-muted">No teams found.</div>';
+      }
+      res.classList.remove('hidden');
+    });
 
-  <dialog id="feedbackDialog" class="w-[92vw] max-w-lg rounded-2xl border p-0 border-theme surface-strong text-theme">
-    <form method="dialog" class="border-b px-5 py-4 border-theme">
-      <div class="flex items-center justify-between">
-        <h3 id="feedbackTitle" class="text-lg font-semibold">Submit Feedback</h3>
-        <button class="rounded-lg border px-2 py-1 text-xs border-theme">Close</button>
-      </div>
-    </form>
-    <form id="feedbackForm" class="space-y-4 p-5">
-      <input type="hidden" id="councilInput" />
-      <div>
-        <label for="studentName" class="mb-1 block text-sm">Name</label>
-        <input id="studentName" required
-          class="w-full rounded-lg border px-3 py-2 text-sm outline-none border-theme surface-input" />
-      </div>
-      <div>
-        <label for="feedbackText" class="mb-1 block text-sm">Feedback</label>
-        <textarea id="feedbackText" required rows="4"
-          class="w-full rounded-lg border px-3 py-2 text-sm outline-none border-theme surface-input"></textarea>
-      </div>
-      <div class="flex items-center justify-end gap-2">
-        <button type="button" id="cancelFeedback"
-          class="rounded-lg border px-4 py-2 text-sm border-theme">Cancel</button>
-        <button class="rounded-lg px-4 py-2 text-sm font-semibold text-white btn-accent">Submit</button>
-      </div>
-    </form>
-  </dialog>
-  
-  <script src="charts.js"></script>
-  <script src="script.js?v=score-v5"></script>
+    $('st-clear').addEventListener('click', () => {
+      selectedTeamId = null;
+      $('selected-team').classList.add('hidden');
+      $('m-search').parentElement.classList.remove('hidden');
+    });
+
+    // Form Submissions
+    $('lf').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      $('lf-submit').disabled = true;
+      $('lf-submit').textContent = 'Submitting...';
+
+      try {
+        const teamData = {
+          leaderName: $('l-name').value,
+          leaderClass: $('l-cls').value,
+          category: $('l-cat').value,
+          teamName: $('l-team').value,
+          sdg: $('l-sdg').value,
+          brief: $('l-brief').value,
+          prototype: $('l-proto').value,
+          achievements: $('l-ach').value,
+          createdAt: serverTimestamp()
+        };
+        const docRef = await addDoc(collection(db, 'teams'), teamData);
+        
+        await addDoc(collection(db, 'members'), {
+          teamId: docRef.id,
+          name: $('l-name').value,
+          class: $('l-cls').value,
+          role: 'Leader',
+          achievements: $('l-ach').value,
+          createdAt: serverTimestamp()
+        });
+
+        $('step-2').classList.add('hidden');
+        $('step-3').classList.remove('hidden');
+        toast('Team registered successfully!');
+      } catch (err) {
+        console.error(err);
+        toast('Error saving registration', 'error');
+        $('lf-submit').disabled = false;
+        $('lf-submit').textContent = 'Register Team';
+      }
+    });
+
+    $('mf').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if(!selectedTeamId) { toast('Please select a team', 'error'); return; }
+      $('mf-submit').disabled = true;
+      $('mf-submit').textContent = 'Submitting...';
+
+      try {
+        await addDoc(collection(db, 'members'), {
+          teamId: selectedTeamId,
+          name: $('m-name').value,
+          class: $('m-cls').value,
+          role: 'Member',
+          achievements: $('m-ach').value,
+          createdAt: serverTimestamp()
+        });
+
+        $('step-2').classList.add('hidden');
+        $('step-3').classList.remove('hidden');
+        toast('Successfully joined team!');
+      } catch(err) {
+        console.error(err);
+        toast('Error joining team', 'error');
+        $('mf-submit').disabled = false;
+        $('mf-submit').textContent = 'Join Team';
+      }
+    });
+  </script>
 </body>
-
 </html>

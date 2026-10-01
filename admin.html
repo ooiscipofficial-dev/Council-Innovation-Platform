@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GIC Admin Dashboard</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            primary: '#0f172a',
+            accent: '#2563eb',
+            surface: '#ffffff',
+            background: '#f8fafc',
+            border: '#e2e8f0',
+            muted: '#64748b'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body { background-color: #f8fafc; color: #0f172a; -webkit-font-smoothing: antialiased; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .input-field { width: 100%; padding: 0.625rem 0.875rem; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; color: #0f172a; }
+    .input-field:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.625rem 1.25rem; font-weight: 500; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: #0f172a; color: #ffffff; border: 1px solid #0f172a; }
+    .btn-primary:hover { background: #1e293b; }
+    .btn-secondary { background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; }
+    .btn-secondary:hover { background: #f1f5f9; }
+    .nav-bar { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid #e2e8f0; }
+    
+    .toast { position: fixed; top: 1rem; right: 1rem; padding: 1rem 1.25rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 0.75rem; z-index: 50; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    .section { display: none; }
+    .section.active { display: block; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Super detailed print report */
+    @media print {
+      body { background: #fff !important; color: #000 !important; font-size: 10pt; }
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      .card { border: none; box-shadow: none; padding: 0; }
+      h2 { font-size: 18pt; margin-bottom: 10px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 20px; page-break-inside: auto; }
+      tr { page-break-inside: avoid; page-break-after: auto; }
+      th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+      th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; }
+      .sdg-badge { border: none; padding: 0; background: none; }
+    }
+    .print-only { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav-bar sticky top-0 z-40 no-print" id="nav-main" style="display: none;">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-primary text-white rounded-md flex items-center justify-center">
+          <i data-lucide="shield" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-primary leading-tight">GIC Admin</h1>
+          <p class="text-xs text-muted">Dashboard</p>
+        </div>
+      </div>
+      <div class="flex gap-4">
+        <a href="index.html" class="text-sm font-medium text-muted hover:text-primary transition-colors">Go to Portal</a>
+        <button id="btn-logout" class="text-sm font-medium text-red-600 hover:text-red-800 transition-colors">Sign Out</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Login Section -->
+  <div id="sec-login" class="section active flex items-center justify-center min-h-screen no-print">
+    <div class="card w-full max-w-sm p-8">
+      <div class="flex justify-center mb-6">
+        <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
+          <i data-lucide="lock" class="w-6 h-6 text-slate-700"></i>
+        </div>
+      </div>
+      <h3 class="text-2xl font-bold text-center mb-2">Admin Login</h3>
+      <p class="text-sm text-muted text-center mb-6">Enter your Firebase Auth credentials</p>
+      
+      <form id="form-login" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+          <input type="email" id="auth-email" class="input-field" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+          <input type="password" id="auth-pw" class="input-field" required>
+        </div>
+        <button type="submit" id="btn-login" class="btn btn-primary w-full mt-2">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dashboard Section -->
+  <main id="sec-dashboard" class="section max-w-6xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8 no-print">
+      <div>
+        <h2 class="text-2xl font-bold text-primary">Overview</h2>
+        <p class="text-sm text-muted">Real-time statistics from Firestore</p>
+      </div>
+      <button onclick="window.print()" class="btn btn-secondary text-sm">
+        <i data-lucide="printer" class="w-4 h-4"></i> Print Detailed Report
+      </button>
+    </div>
+
+    <!-- Print Header -->
+    <div class="print-only mb-8 text-center border-b pb-4">
+      <h1 class="text-2xl font-bold">Global Innovation Challenge</h1>
+      <h2 class="text-lg text-slate-600">Official Consolidated Registration Report</h2>
+      <p class="text-sm text-slate-500 mt-2" id="print-date"></p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="card p-5">
+        <div class="text-sm text-muted mb-1 flex items-center justify-between">Total Teams <i data-lucide="users" class="w-4 h-4 no-print"></i></div>
+        <div class="text-3xl font-bold" id="stat-teams">0</div>
+      </div>
+      <div class="card p-5">
+        <div class="text-sm text-muted mb-1 flex items-center justify-between">Total Participants <i data-lucide="user" class="w-4 h-4 no-print"></i></div>
+        <div class="text-3xl font-bold" id="stat-members">0</div>
+      </div>
+      <div class="card p-5">
+        <div class="text-sm text-muted mb-1 flex items-center justify-between">Primary <i data-lucide="book" class="w-4 h-4 no-print"></i></div>
+        <div class="text-3xl font-bold text-blue-600" id="stat-pri">0</div>
+      </div>
+      <div class="card p-5">
+        <div class="text-sm text-muted mb-1 flex items-center justify-between">High School <i data-lucide="graduation-cap" class="w-4 h-4 no-print"></i></div>
+        <div class="text-3xl font-bold text-purple-600" id="stat-hi">0</div>
+      </div>
+    </div>
+
+    <div class="card overflow-hidden">
+      <div class="p-4 border-b bg-slate-50 flex justify-between items-center no-print">
+        <h3 class="font-semibold">Detailed Team Registry</h3>
+        <input type="text" id="dash-search" placeholder="Search..." class="input-field py-1.5 px-3 text-sm w-48 max-w-full">
+      </div>
+      
+      <div class="overflow-x-auto print-only-table">
+        <table class="w-full text-sm text-left">
+          <thead class="text-xs text-muted uppercase bg-slate-50 border-b">
+            <tr>
+              <th class="px-4 py-3 min-w-[150px]">Team & Category</th>
+              <th class="px-4 py-3 min-w-[150px]">Leader</th>
+              <th class="px-4 py-3 min-w-[200px]">Members</th>
+              <th class="px-4 py-3 min-w-[250px]">Project Details</th>
+              <th class="px-4 py-3 min-w-[200px]">Prototype Plan</th>
+            </tr>
+          </thead>
+          <tbody id="dash-table">
+            <tr><td colspan="5" class="text-center py-8 text-muted">Loading data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Print Footer -->
+    <div class="print-only mt-16 grid grid-cols-2 gap-16">
+      <div class="border-t border-black pt-2">
+        <p class="font-bold">Checked By</p>
+        <p class="text-xs text-slate-500">Signature over printed name & Date</p>
+      </div>
+      <div class="border-t border-black pt-2">
+        <p class="font-bold">Approved By</p>
+        <p class="text-xs text-slate-500">Signature over printed name & Date</p>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="toast-container" class="no-print"></div>
+
+  <script>
+    lucide.createIcons();
+
+    function toast(msg, type='success') {
+      const t = document.createElement('div');
+      t.className = 'toast border-l-4 ' + (type==='success'?'border-l-green-500':'border-l-red-500');
+      t.innerHTML = `<span class="font-medium text-sm">${msg}</span>`;
+      document.getElementById('toast-container').appendChild(t);
+      setTimeout(() => { t.style.opacity=0; setTimeout(()=>t.remove(),300); }, 3000);
+    }
+  </script>
+
+  <!-- FIREBASE MODULE -->
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+    import { collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+    const $ = id => document.getElementById(id);
+    let allTeams = [];
+    let allMembers = [];
+
+    // Setup print date
+    $('print-date').textContent = new Date().toLocaleString();
+
+    // AUTH LISTENER
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in
+        $('sec-login').classList.remove('active');
+        $('sec-dashboard').classList.add('active');
+        $('nav-main').style.display = 'flex';
+        loadData();
+      } else {
+        // User is signed out
+        $('sec-dashboard').classList.remove('active');
+        $('sec-login').classList.add('active');
+        $('nav-main').style.display = 'none';
+      }
+    });
+
+    // LOGIN
+    $('form-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = $('auth-email').value;
+      const pw = $('auth-pw').value;
+      $('btn-login').disabled = true;
+      $('btn-login').textContent = 'Authenticating...';
+
+      try {
+        await signInWithEmailAndPassword(auth, email, pw);
+        toast('Logged in successfully!');
+      } catch (err) {
+        console.error(err);
+        toast(err.message, 'error');
+      } finally {
+        $('btn-login').disabled = false;
+        $('btn-login').textContent = 'Sign In';
+      }
+    });
+
+    // LOGOUT
+    $('btn-logout').addEventListener('click', () => {
+      signOut(auth);
+    });
+
+    // LOAD DATA
+    function loadData() {
+      // Teams
+      const qTeams = query(collection(db, 'teams'), orderBy('createdAt', 'desc'));
+      onSnapshot(qTeams, (snapshot) => {
+        allTeams = [];
+        snapshot.forEach(doc => {
+          allTeams.push({ id: doc.id, ...doc.data() });
+        });
+        updateUI();
+      });
+
+      // Members
+      const qMembers = query(collection(db, 'members'), orderBy('createdAt', 'asc'));
+      onSnapshot(qMembers, (snapshot) => {
+        allMembers = [];
+        snapshot.forEach(doc => {
+          allMembers.push({ id: doc.id, ...doc.data() });
+        });
+        updateUI();
+      });
+    }
+
+    function updateUI() {
+      $('stat-teams').textContent = allTeams.length;
+      $('stat-members').textContent = allMembers.length;
+      $('stat-pri').textContent = allTeams.filter(t => t.category === 'Primary').length;
+      $('stat-hi').textContent = allTeams.filter(t => t.category === 'High School').length;
+
+      renderTable(allTeams);
+    }
+
+    function renderTable(teamsToRender) {
+      const tbody = $('dash-table');
+      if (teamsToRender.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-muted">No data found.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = teamsToRender.map(t => {
+        const tMembers = allMembers.filter(m => m.teamId === t.id && m.role === 'Member');
+        const membersHtml = tMembers.map(m => `
+          <div class="mb-1 pb-1 border-b border-slate-100 last:border-0">
+            <span class="font-medium">${m.name}</span> <span class="text-xs text-slate-500">(${m.class})</span>
+            ${m.achievements ? `<div class="text-xs text-amber-600 mt-0.5">🏆 ${m.achievements}</div>` : ''}
+          </div>
+        `).join('') || '<span class="italic text-slate-400">No additional members</span>';
+
+        return `
+          <tr class="border-b hover:bg-slate-50 align-top">
+            <td class="px-4 py-4">
+              <div class="font-bold text-slate-900">${t.teamName}</div>
+              <div class="text-xs font-semibold text-primary mt-1 px-2 py-0.5 bg-slate-100 inline-block rounded">${t.category}</div>
+            </td>
+            <td class="px-4 py-4">
+              <div class="font-medium text-slate-800">${t.leaderName}</div>
+              <div class="text-xs text-slate-500 mt-0.5">${t.leaderClass}</div>
+              ${t.achievements ? `<div class="text-xs text-amber-600 mt-1">🏆 ${t.achievements}</div>` : ''}
+            </td>
+            <td class="px-4 py-4 text-sm text-slate-700">
+              ${membersHtml}
+            </td>
+            <td class="px-4 py-4">
+              <div class="text-xs font-bold text-blue-600 mb-1">${t.sdg}</div>
+              <div class="text-xs text-slate-600 leading-relaxed">${t.brief}</div>
+            </td>
+            <td class="px-4 py-4 text-xs text-slate-600 leading-relaxed">
+              ${t.prototype}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // SEARCH
+    $('dash-search').addEventListener('keyup', (e) => {
+      const q = e.target.value.toLowerCase();
+      const filtered = allTeams.filter(t => 
+        (t.teamName && t.teamName.toLowerCase().includes(q)) || 
+        (t.leaderName && t.leaderName.toLowerCase().includes(q)) ||
+        (t.sdg && t.sdg.toLowerCase().includes(q))
+      );
+      renderTable(filtered);
+    });
+
+  </script>
+</body>
+</html>
