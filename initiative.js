@@ -63,7 +63,14 @@ function initInitiativePage() {
 
   document.getElementById("initiativeTitle").textContent = initiative.title;
   document.getElementById("initiativeSummary").textContent = initiative.summary;
+  renderInitiativeDetails(initiative.detailsMarkdown || '');
   document.getElementById("initiativeBackToCouncil").href = `council.html?council=${encodeURIComponent(councilSlug)}`;
+  const registrationForm = document.getElementById("initiativeRegistrationForm");
+  if (registrationForm && initiative.registrationFormUrl) {
+    const formPayload = btoa(unescape(encodeURIComponent(JSON.stringify({ url: initiative.registrationFormUrl, title: initiative.title || 'Registration Form' }))));
+    registrationForm.href = `forms.html#${formPayload}`;
+    registrationForm.classList.remove("hidden");
+  }
 
   document.getElementById("initiativeLeadBlock").innerHTML = renderLeadCard(initiative);
 
@@ -88,6 +95,21 @@ function initInitiativePage() {
   }).join("");
 
   initRevealObserver();
+}
+
+function renderInitiativeDetails(markdown) {
+  const container = document.getElementById('initiativeDetails');
+  if (!container) return;
+  if (!markdown.trim()) {
+    container.innerHTML = '<div class="initiative-details-empty">Additional initiative information will be shared here soon.</div>';
+    return;
+  }
+  if (!window.marked || !window.DOMPurify) {
+    container.textContent = markdown;
+    return;
+  }
+  const html = window.marked.parse(markdown, { gfm: true, breaks: true });
+  container.innerHTML = window.DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
 }
 
 initTheme();

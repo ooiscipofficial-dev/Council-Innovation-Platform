@@ -123,6 +123,7 @@ async function enrichCouncilData() {
         name: d.info?.name || id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
         color: d.info?.color || "#4e79db",
         homepage: d.info?.homepage || "#",
+        feedbackFormUrl: d.info?.feedbackFormUrl || "",
         mission: d.info?.mission || "Mission pending...",
         achievement: d.info?.achievement || "No major achievements yet.",
         impactScore: calculateImpactScore(d),
@@ -216,6 +217,13 @@ function createCouncilCard(council, isHouse = false) {
   card.className = `glass reveal council-card rounded-2xl border p-4 md:p-5 ${isHouse ? "house-accent" : ""}`;
   if (isHouse) card.style.setProperty("--house-color", getHouseColorByName(council));
   card.setAttribute("tabindex", "0");
+  const councilInitials = council.name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
 
   const initiativeMarkup = council.initiatives
     .slice(0, 2)
@@ -226,10 +234,7 @@ function createCouncilCard(council, isHouse = false) {
 card.innerHTML = `
   <div class="flex items-start gap-3">
     
-    <!-- Logo -->
-    <div class="logo-wrapper">
-      <img src="${council.logo}" alt="${council.name} logo" class="logo-img" />
-    </div>
+    <div class="logo-wrapper" aria-label="${council.name} placeholder"><span class="council-initials">${councilInitials}</span></div>
 
     <!-- Title + Status -->
     <div class="flex-1 flex items-start justify-between gap-3">
@@ -282,7 +287,7 @@ card.innerHTML = `
       Impact Score: <strong class="text-theme">${council.impactScore}</strong>
     </span>
     <button class="feedback-btn rounded-lg px-3 py-1.5 text-xs font-semibold text-white btn-accent"
-            data-council="${council.name}">
+            data-council="${council.name}" data-feedback-form-url="${council.feedbackFormUrl || ''}">
       Give Feedback
     </button>
   </div>
@@ -303,8 +308,38 @@ card.innerHTML = `
 }
 
 function renderCouncils() {
-  councilData.academicCouncils.forEach((council) => academicGrid.appendChild(createCouncilCard(council)));
-  councilData.houseCouncils.forEach((council) => houseGrid.appendChild(createCouncilCard(council, true)));
+  if (!academicGrid) return;
+  academicGrid.innerHTML = "";
+  const topCouncils = [...allCouncils]
+    .sort((a, b) => (b.impactScore || 0) - (a.impactScore || 0))
+    .slice(0, 4);
+  topCouncils.forEach((council, index) => academicGrid.appendChild(createTopCouncilCard(council, index)));
+}
+
+function createTopCouncilCard(council, index) {
+  const card = document.createElement("article");
+  card.className = "kgf-council-card reveal";
+  card.tabIndex = 0;
+  const initials = council.name.split(/\s+/).filter(Boolean).slice(0, 2).map((word) => word[0]).join("").toUpperCase();
+  const project = council.mainProject?.title || "No active project";
+  const status = council.mainProject?.status || "Not started";
+  const progress = Number(council.mainProject?.progress || 0);
+
+  card.innerHTML = `
+    <div class="kgf-council-poster poster-${index % 4}"><span class="kgf-council-initials">${initials}</span><b>${council.name}</b><small>Council Hub</small></div>
+    <div class="kgf-council-copy">
+      <div class="kgf-council-topline"><span>${status}</span><button class="feedback-btn" data-council="${council.name}" data-feedback-form-url="${council.feedbackFormUrl || ''}">Give feedback</button></div>
+      <h3>${council.name}</h3>
+      <div class="kgf-council-facts"><span>2026</span><i>•</i><span>Campus council</span><i>•</i><span>${project}</span></div>
+      <div class="kgf-council-score"><b>★</b><strong>${council.impactScore}</strong><span>/ 100 impact score</span></div>
+      <p class="kgf-council-description">${council.achievement || "Building meaningful initiatives for the school community."}</p>
+      <div class="kgf-council-footer"><span>Project progress</span><div><i style="width:${Math.min(100, Math.max(0, progress))}%"></i></div><strong>${progress}%</strong></div>
+    </div>`;
+
+  const openCouncil = () => { window.location.href = `council.html?council=${encodeURIComponent(toSlug(council.name))}`; };
+  card.addEventListener("click", (event) => { if (!event.target.closest(".feedback-btn")) openCouncil(); });
+  card.addEventListener("keydown", (event) => { if (event.key === "Enter") openCouncil(); });
+  return card;
 }
 
 function animateCount(el, target) {
@@ -325,7 +360,7 @@ function renderHeroStats() {
 
   if (!allCouncils || allCouncils.length === 0) {
     const placeholder = document.createElement("div");
-    placeholder.className = "col-span-full py-4 text-center text-xs text-muted/50 italic";
+    placeholder.className = "console-stat-loading";
     placeholder.textContent = "Syncing institutional metrics...";
     heroStats.appendChild(placeholder);
     return;
@@ -345,13 +380,12 @@ function renderHeroStats() {
 
   stats.forEach((stat) => {
     const box = document.createElement("div");
-    box.className = "rounded-xl border border-theme px-3 py-3 reveal";
-    box.style.background = "color-mix(in srgb, var(--surface) 66%, transparent)";
+    box.className = "console-stat";
 
     if (stat.text) {
-      box.innerHTML = `<p class="text-xs text-muted">${stat.label}</p><p class="mt-1 text-lg font-semibold">${stat.text}</p>`;
+      box.innerHTML = `<p>${stat.label}</p><strong>${stat.text}</strong>`;
     } else {
-      box.innerHTML = `<p class="text-xs text-muted">${stat.label}</p><p class="mt-1 text-lg font-semibold"><span class="count">0</span>${stat.suffix || ""}</p>`;
+      box.innerHTML = `<p>${stat.label}</p><strong><span class="count">0</span>${stat.suffix || ""}</strong>`;
       animateCount(box.querySelector(".count"), stat.value);
     }
 
@@ -464,7 +498,7 @@ function renderRanking() {
     const scoreColor = council.impactScore >= 80 ? "text-green-400" : council.impactScore >= 60 ? "text-blue-400" : "text-amber-400";
     
     item.innerHTML = `
-      <a class="group block rounded-xl border border-white/5 bg-white/5 p-3 transition-all hover:bg-white/10 hover:border-white/10" href="council.html?council=${encodeURIComponent(toSlug(council.name))}">
+      <a class="ranking-entry group block rounded-xl border border-white/5 bg-white/5 p-3 transition-all hover:bg-white/10 hover:border-white/10" href="council.html?council=${encodeURIComponent(toSlug(council.name))}">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <span class="text-xs font-black text-muted/30 w-4">${index + 1}</span>
@@ -519,28 +553,17 @@ function initBarChartHover() {
 
 
 function bindFeedbackHandlers() {
-  const dialog = document.getElementById("feedbackDialog");
-  const cancelBtn = document.getElementById("cancelFeedback");
-  const form = document.getElementById("feedbackForm");
-  
-  if (!dialog || !cancelBtn || !form) return;
-
   document.body.addEventListener("click", (event) => {
     const button = event.target.closest(".feedback-btn");
     if (!button) return;
     event.stopPropagation();
-    if (councilInput) councilInput.value = button.dataset.council;
-    if (feedbackTitle) feedbackTitle.textContent = `Feedback for ${button.dataset.council}`;
-    dialog.showModal();
-  });
-
-  cancelBtn.addEventListener("click", () => dialog.close());
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const val = councilInput ? councilInput.value : "Council";
-    alert(`Thanks. Feedback submitted for ${val}.`);
-    event.target.reset();
-    dialog.close();
+    const formUrl = button.dataset.feedbackFormUrl;
+    if (!formUrl) {
+      alert(`A feedback form has not been configured for ${button.dataset.council} yet.`);
+      return;
+    }
+    const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ url: formUrl, title: `${button.dataset.council} Feedback` }))));
+    window.location.href = `forms.html#${payload}`;
   });
 }
 
@@ -563,13 +586,78 @@ function setTheme(theme) {
 }
 
 function initTheme() {
-  const saved = localStorage.getItem("council-theme") || "dark";
+  const saved = localStorage.getItem("council-theme") || "light";
   setTheme(saved);
   const toggle = () => setTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
   const desktopToggle = document.getElementById("themeToggle");
   const mobileToggle = document.getElementById("mobileThemeToggle");
   if (desktopToggle) desktopToggle.addEventListener("click", toggle);
   if (mobileToggle) mobileToggle.addEventListener("click", toggle);
+}
+
+function initAppShell() {
+  const sideNav = document.getElementById("sideNav");
+  const drawer = document.getElementById("activityDrawer");
+  const backdrop = document.getElementById("sideBackdrop");
+  const menu = document.getElementById("menuToggle");
+  const notification = document.getElementById("notificationToggle");
+  const closeNotification = document.getElementById("notificationClose");
+  if (!sideNav && !drawer) return;
+  const closeAll = () => { sideNav?.classList.remove("open"); drawer?.classList.remove("open"); backdrop?.classList.remove("visible"); document.body.classList.remove("drawer-open"); };
+  menu?.addEventListener("click", () => { const opening = !sideNav.classList.contains("open"); closeAll(); if (opening) { sideNav.classList.add("open"); backdrop?.classList.add("visible"); } });
+  notification?.addEventListener("click", () => { const opening = !drawer.classList.contains("open"); closeAll(); if (opening) { drawer.classList.add("open"); backdrop?.classList.add("visible"); document.body.classList.add("drawer-open"); } });
+  closeNotification?.addEventListener("click", closeAll);
+  backdrop?.addEventListener("click", closeAll);
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeAll(); });
+  const syncScrolledNavigation = () => document.body.classList.toggle("nav-expanded", window.scrollY > 8);
+  syncScrolledNavigation();
+  window.addEventListener("scroll", syncScrolledNavigation, { passive: true });
+}
+
+function toPadletEmbedUrl(value = "") {
+  const raw = String(value).trim();
+  if (!raw) return "";
+  try {
+    const url = new URL(raw);
+    if (!/(^|\.)padlet\.com$/i.test(url.hostname) || url.pathname.startsWith("/embed/")) return url.toString();
+    const board = url.pathname.split("/").filter(Boolean).at(-1);
+    const embedId = board?.includes("-") ? board.split("-").at(-1) : board;
+    return embedId ? `https://padlet.com/embed/${embedId}` : url.toString();
+  } catch {
+    return raw;
+  }
+}
+
+async function initAnnouncementsPage() {
+  const loading = document.getElementById("announcementsLoading");
+  const empty = document.getElementById("announcementsEmpty");
+  const frame = document.getElementById("announcementsPadlet");
+  if (!frame) return;
+
+  try {
+    const response = await fetch(`${API_BASE}/system/settings`, { cache: "no-store" });
+    if (!response.ok) throw new Error("Announcements settings unavailable");
+    const { settings = {} } = await response.json();
+    const url = toPadletEmbedUrl(settings.announcementsPadlet);
+    if (!url) {
+      empty.hidden = false;
+      return;
+    }
+    frame.src = url;
+    frame.hidden = false;
+  } catch (error) {
+    console.error("Failed to load announcements:", error);
+    empty.hidden = false;
+  } finally {
+    loading.hidden = true;
+  }
+}
+
+function repairNavigationGlyphs() {
+  const previous = document.getElementById("prevMonth");
+  const next = document.getElementById("nextMonth");
+  if (previous) previous.textContent = String.fromCharCode(8592);
+  if (next) next.textContent = String.fromCharCode(8594);
 }
 
 function initHeroAnimation() {
@@ -644,8 +732,9 @@ async function initDashboardPage() {
   renderCouncils();
   renderHeroStats();
   renderRanking();
-  setChart("pie");
+  if (typeof setChart === "function") setChart("pie");
   bindFeedbackHandlers();
+  initAppShell();
   
   await renderActivityFeed();
 
@@ -694,7 +783,7 @@ function initCouncilDetailPage() {
     metricBox.innerHTML = metrics.map((metric) => `
       <article class="detail-metric border border-white/5 bg-white/[0.02] p-4 rounded-xl">
         <p class="text-xs text-muted uppercase tracking-wider font-bold">${metric.label}</p>
-        <p class="mt-2 text-2xl font-black text-white">${metric.value}</p>
+        <p class="detail-metric-value mt-2 text-2xl font-black">${metric.value}</p>
       </article>
     `).join("");
   }
@@ -1154,7 +1243,14 @@ function initInitiativePage() {
 
   document.getElementById("initiativeTitle").textContent = initiative.title;
   document.getElementById("initiativeSummary").textContent = initiative.summary;
+  renderInitiativeDetails(initiative.detailsMarkdown || '');
   document.getElementById("initiativeBackToCouncil").href = `council.html?council=${encodeURIComponent(councilSlug)}`;
+  const registrationForm = document.getElementById("initiativeRegistrationForm");
+  if (registrationForm && initiative.registrationFormUrl) {
+    const formPayload = btoa(unescape(encodeURIComponent(JSON.stringify({ url: initiative.registrationFormUrl, title: initiative.title || 'Registration Form' }))));
+    registrationForm.href = `forms.html#${formPayload}`;
+    registrationForm.classList.remove("hidden");
+  }
 
   document.getElementById("initiativeLeadBlock").innerHTML = renderLeadCard(initiative);
 
@@ -1214,6 +1310,21 @@ function renderLeadCard(initiative) {
       ` : ""}
     </article>
   `;
+}
+
+function renderInitiativeDetails(markdown) {
+  const container = document.getElementById('initiativeDetails');
+  if (!container) return;
+  if (!markdown.trim()) {
+    container.innerHTML = '<div class="initiative-details-empty">Additional initiative information will be shared here soon.</div>';
+    return;
+  }
+  if (!window.marked || !window.DOMPurify) {
+    container.textContent = markdown;
+    return;
+  }
+  const html = window.marked.parse(markdown, { gfm: true, breaks: true });
+  container.innerHTML = window.DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
 }
 
 const feedMessages = [];
@@ -1277,12 +1388,20 @@ async function renderActivityFeed() {
     event: "★"
   };
 
+  const faIcons = {
+    info: '<i class="fa-solid fa-circle-info"></i>',
+    vote: '<i class="fa-solid fa-scale-balanced"></i>',
+    ok: '<i class="fa-solid fa-check"></i>',
+    event: '<i class="fa-solid fa-star"></i>'
+  };
+
   const colors = {
     info: "text-blue-400 bg-blue-400/10",
     vote: "text-purple-400 bg-purple-400/10",
     ok: "text-green-400 bg-green-400/10",
     event: "text-amber-400 bg-amber-400/10"
   };
+  Object.assign(icons, faIcons);
 
   sortedMessages.forEach((m, i) => {
     const dateObj = new Date(m.date);
@@ -1623,11 +1742,20 @@ if (yearEl) yearEl.textContent = `• Academic Year ${startYear} – ${endYear}`
 
 async function init() {
   initTheme();
+  repairNavigationGlyphs();
   await enrichCouncilData();
   
   // Page-specific initialization
-  if (academicGrid && houseGrid && rankingList) {
+  if (academicGrid) {
     await initDashboardPage();
+  } else if (document.body.dataset.page === "announcements") {
+    initAppShell();
+    await initAnnouncementsPage();
+  } else if (document.body.dataset.page === "rankings") {
+    renderRanking();
+    initAppShell();
+    await renderActivityFeed();
+    initRevealObserver();
   } else if (document.getElementById("globalCalendarPage")) {
     initGlobalCalendarPage();
   } else {

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Council Rankings | CIP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" referrerpolicy="no-referrer">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script><link rel="stylesheet" href="styles.css">
+</head>
+<body class="cip-dashboard min-h-screen" data-page="rankings">
+  <div id="loadingOverlay" class="fixed inset-0 z-[100] grid place-items-center bg-[#07111b] text-white"><p class="text-xs font-bold uppercase tracking-[.3em]">Loading rankings</p></div>
+  <div id="sideBackdrop" class="app-backdrop"></div>
+  <aside id="sideNav" class="side-nav" aria-label="Primary navigation"><a class="brand" href="index.html"><span class="brand-mark">C</span><span>Council Hub</span></a><a class="side-link" href="index.html"><span><i class="fa-solid fa-chart-pie"></i></span> Overview</a><a class="side-link" href="index.html#top-councils"><span><i class="fa-solid fa-trophy"></i></span> Top councils</a><a class="side-link" href="calendar.html"><span><i class="fa-regular fa-calendar"></i></span> Calendar</a><a class="side-link active" href="rankings.html"><span><i class="fa-solid fa-ranking-star"></i></span> Council rankings</a><button id="themeToggle" class="side-link side-button"><span><i class="fa-solid fa-circle-half-stroke"></i></span> Change theme</button></aside>
+  <main class="app-main"><header class="topbar"><button id="menuToggle" class="icon-button menu-collapse" aria-label="Open navigation"><i class="fa-solid fa-bars"></i></button><div class="topbar-spacer"></div><div class="topbar-actions"><button id="notificationToggle" class="icon-button notification-button" aria-label="Open notifications"><i class="fa-regular fa-bell"></i><b></b></button><a href="index.html" class="back-to-dashboard"><i class="fa-solid fa-arrow-left"></i> Dashboard</a></div></header><section class="ranking-page"><p class="eyebrow">Performance board</p><h1>Council <em>rankings.</em></h1><p class="ranking-intro">An institutional view of impact, delivery momentum, and initiative progress. Select any council for its full analysis.</p><ol id="rankingList" class="ranking-list"></ol></section></main>
+  <aside id="activityDrawer" class="activity-drawer" aria-label="Live activity"><div class="drawer-head"><div><p class="eyebrow">Live updates</p><h2>Notifications</h2></div><button id="notificationClose" class="icon-button" aria-label="Close notifications"><i class="fa-solid fa-xmark"></i></button></div><p class="drawer-subtitle">Recent activity across every council.</p><div id="activityFeed" class="activity-list"></div></aside>
+  <script src="script.js?v=rankings-v4"></script>
+</body></html>

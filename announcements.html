@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Announcements | Council Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" referrerpolicy="no-referrer" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="cip-dashboard min-h-screen" data-page="announcements">
+  <div id="sideBackdrop" class="app-backdrop"></div>
+  <aside id="sideNav" class="side-nav" aria-label="Primary navigation">
+    <a class="brand" href="index.html"><span class="brand-mark">C</span><span>Council Hub</span></a>
+    <a class="side-link" href="index.html"><span><i class="fa-solid fa-chart-pie"></i></span> Overview</a>
+    <a class="side-link" href="index.html#top-councils"><span><i class="fa-solid fa-trophy"></i></span> Top councils</a>
+    <a class="side-link" href="calendar.html"><span><i class="fa-regular fa-calendar"></i></span> Calendar</a>
+    <a class="side-link" href="rankings.html"><span><i class="fa-solid fa-ranking-star"></i></span> Council rankings</a>
+    <a class="side-link active" href="announcements.html"><span><i class="fa-solid fa-bullhorn"></i></span> Announcements</a>
+    <button id="themeToggle" class="side-link side-button"><span><i class="fa-solid fa-circle-half-stroke"></i></span> Change theme</button>
+  </aside>
+  <main class="app-main">
+    <header class="topbar">
+      <button id="menuToggle" class="icon-button menu-collapse" aria-label="Open navigation"><i class="fa-solid fa-bars"></i></button>
+      <div class="topbar-spacer"></div>
+      <div class="topbar-actions"><a href="index.html" class="back-to-dashboard"><i class="fa-solid fa-arrow-left"></i> Dashboard</a></div>
+    </header>
+    <section class="announcements-page" aria-label="Council announcements">
+      <div id="announcementsLoading" class="announcements-status">Loading announcements…</div>
+      <div id="announcementsEmpty" class="announcements-status" hidden>
+        <div><i class="fa-solid fa-bullhorn"></i><h1>Announcements are not linked yet</h1><p>A manager can add the shared Announcements Padlet in Manager Access.</p></div>
+      </div>
+      <iframe id="announcementsPadlet" title="Council announcements" allow="camera;microphone;geolocation;display-capture;clipboard-write" frameborder="0" hidden></iframe>
+    </section>
+  </main>
+  <script src="script.js?v=announcements-v1"></script>
+</body>
+</html>
