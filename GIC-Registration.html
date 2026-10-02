@@ -367,7 +367,7 @@
     $('m-search').addEventListener('keyup', (e) => {
       const q = e.target.value.toLowerCase();
       const res = $('search-results');
-      if(!q) { res.classList.add('hidden'); return; }
+      if(q.length < 3) { res.classList.add('hidden'); return; }
       
       const hits = teamsList.filter(t => t.teamName.toLowerCase().includes(q) || t.leaderName.toLowerCase().includes(q));
       if(hits.length) {
@@ -389,6 +389,7 @@
             $('st-name').textContent = t.teamName;
             $('st-info').textContent = 'Leader: ' + t.leaderName;
             $('selected-team').classList.remove('hidden');
+            toast('Successfully joined team!');
           });
         });
       } else {
