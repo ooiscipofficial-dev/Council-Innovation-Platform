@@ -22,17 +22,22 @@
     .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
     .input-field { width: 100%; padding: 0.5rem 0.75rem; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
     .input-field:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+    textarea.input-field { resize: vertical; }
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.5rem 1rem; font-weight: 500; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-primary { background: #0f172a; color: #ffffff; border: 1px solid #0f172a; }
     .btn-primary:hover { background: #1e293b; }
     .btn-secondary { background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; }
     .btn-secondary:hover { background: #f1f5f9; }
     .nav-bar { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid #e2e8f0; }
-    .toast { position: fixed; top: 1rem; right: 1rem; padding: 1rem 1.25rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 0.75rem; z-index: 50; animation: slideIn 0.3s ease; }
+    .toast { position: fixed; top: 1rem; right: 1rem; padding: 1rem 1.25rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 0.75rem; z-index: 70; animation: slideIn 0.3s ease; }
     @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     .section { display: none; }
     .section.active { display: block; animation: fadeIn 0.4s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 60; display: none; align-items: flex-start; justify-content: center; padding: 2rem 1rem; overflow-y: auto; }
+    .modal-backdrop.open { display: flex; }
+    .modal-label { display: block; font-size: 0.75rem; font-weight: 600; color: #475569; margin-bottom: 0.25rem; }
     @media print {
       body { background: #fff !important; color: #000 !important; font-size: 9pt; }
       .no-print { display: none !important; }
@@ -176,16 +181,73 @@
               <th class="px-4 py-3">Member Details</th>
               <th class="px-4 py-3">SDG & Brief</th>
               <th class="px-4 py-3">Prototype Plan</th>
+              <th class="px-4 py-3 no-print">Actions</th>
             </tr>
           </thead>
           <tbody id="dash-table">
-            <tr><td colspan="5" class="text-center py-8 text-muted">Loading data...</td></tr>
+            <tr><td colspan="6" class="text-center py-8 text-muted">Loading data...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
   </main>
+
+  <!-- Edit Team Modal -->
+  <div id="edit-modal" class="modal-backdrop no-print">
+    <div class="card w-full max-w-3xl">
+      <div class="p-4 border-b bg-slate-50 flex justify-between items-center rounded-t-xl">
+        <h3 class="font-semibold">Edit team details</h3>
+        <button type="button" id="btn-close-modal" class="text-slate-400 hover:text-slate-700" aria-label="Close"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="form-edit-team" class="p-5 space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="modal-label" for="e-teamName">Team name</label>
+            <input id="e-teamName" class="input-field" required>
+          </div>
+          <div>
+            <label class="modal-label" for="e-category">Category</label>
+            <select id="e-category" class="input-field">
+              <option value="Primary">Primary</option>
+              <option value="High School">High School</option>
+            </select>
+          </div>
+        </div>
+
+        <fieldset class="border border-slate-200 rounded-lg p-4">
+          <legend class="px-2 text-sm font-semibold">Team leader</legend>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><label class="modal-label" for="e-leaderName">Name</label><input id="e-leaderName" class="input-field" required></div>
+            <div><label class="modal-label" for="e-leaderClass">Class</label><input id="e-leaderClass" class="input-field"></div>
+            <div><label class="modal-label" for="e-leaderEmail">Email</label><input id="e-leaderEmail" type="email" class="input-field" required></div>
+            <div><label class="modal-label" for="e-whatsapp">WhatsApp</label><input id="e-whatsapp" class="input-field"></div>
+            <div class="md:col-span-2"><label class="modal-label" for="e-transport">Transport</label><input id="e-transport" class="input-field"></div>
+          </div>
+          <div class="mt-4">
+            <label class="modal-label" for="e-allowed">Intended member emails (comma or new line separated)</label>
+            <textarea id="e-allowed" rows="2" class="input-field"></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset class="border border-slate-200 rounded-lg p-4">
+          <legend class="px-2 text-sm font-semibold">Members</legend>
+          <div id="e-members" class="space-y-4"></div>
+        </fieldset>
+
+        <div class="grid grid-cols-1 gap-4">
+          <div><label class="modal-label" for="e-sdg">SDG</label><input id="e-sdg" class="input-field"></div>
+          <div><label class="modal-label" for="e-brief">Brief</label><textarea id="e-brief" rows="4" class="input-field"></textarea></div>
+          <div><label class="modal-label" for="e-prototype">Prototype plan</label><textarea id="e-prototype" rows="4" class="input-field"></textarea></div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t">
+          <button type="button" id="btn-cancel-edit" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="btn-save-edit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <div id="toast-container" class="no-print"></div>
 
@@ -194,7 +256,10 @@
     window.toast = function(msg, type='success') {
       const t = document.createElement('div');
       t.className = 'toast border-l-4 ' + (type==='success'?'border-l-green-500':'border-l-red-500');
-      t.innerHTML = `<span class="font-medium text-sm">${msg}</span>`;
+      const s = document.createElement('span');
+      s.className = 'font-medium text-sm';
+      s.textContent = msg;
+      t.appendChild(s);
       document.getElementById('toast-container').appendChild(t);
       setTimeout(() => { t.style.opacity=0; setTimeout(()=>t.remove(),300); }, 3000);
     }
@@ -204,7 +269,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-    import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, setDoc, deleteDoc, writeBatch, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAtc5IAwW19sJMQRN4BGkpLeBULFJfx4po",
@@ -224,6 +289,10 @@
     let allTeams = [];
     let allMembers = [];
     let whitelist = [];
+    let editingTeamId = null;
+
+    // Escape respondent-entered text before putting it into HTML
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
     $('print-date').textContent = new Date().toLocaleString();
 
@@ -318,10 +387,11 @@
       }
       c.innerHTML = whitelist.map(email => `
         <div class="flex items-center gap-2 bg-white border rounded-full px-3 py-1 text-sm shadow-sm">
-          <span class="font-medium">${email}</span>
-          <button onclick="removeWhitelist('${email}')" class="text-slate-400 hover:text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button>
+          <span class="font-medium">${esc(email)}</span>
+          <button data-email="${esc(email)}" class="btn-remove-wl text-slate-400 hover:text-red-500"><i data-lucide="x" class="w-3 h-3"></i></button>
         </div>
       `).join('');
+      c.querySelectorAll('.btn-remove-wl').forEach(b => b.addEventListener('click', () => window.removeWhitelist(b.dataset.email)));
       lucide.createIcons();
     }
 
@@ -330,13 +400,13 @@
       $('stat-members').textContent = allMembers.length;
       $('stat-pri').textContent = allTeams.filter(t => t.category === 'Primary').length;
       $('stat-hi').textContent = allTeams.filter(t => t.category === 'High School').length;
-      renderTable(allTeams);
+      applySearch();
     }
 
     function renderTable(teamsToRender) {
       const tbody = $('dash-table');
       if (teamsToRender.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-muted">No data found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-muted">No data found.</td></tr>';
         return;
       }
 
@@ -344,10 +414,10 @@
         const tMembers = allMembers.filter(m => m.teamId === t.id && m.role === 'Member');
         const membersHtml = tMembers.map(m => `
           <div class="mb-2 pb-2 border-b border-slate-100 last:border-0">
-            <div class="font-medium">${m.name} <span class="font-normal text-xs text-slate-500">(${m.class})</span></div>
-            <div class="text-xs text-slate-600 mt-0.5">✉️ ${m.email}</div>
-            <div class="text-xs text-slate-600">📱 ${m.whatsapp}</div>
-            <div class="text-xs text-slate-600">🚌 ${m.transport}</div>
+            <div class="font-medium">${esc(m.name)} <span class="font-normal text-xs text-slate-500">(${esc(m.class)})</span></div>
+            <div class="text-xs text-slate-600 mt-0.5">✉️ ${esc(m.email)}</div>
+            <div class="text-xs text-slate-600">📱 ${esc(m.whatsapp)}</div>
+            <div class="text-xs text-slate-600">🚌 ${esc(m.transport)}</div>
           </div>
         `).join('') || '<span class="italic text-slate-400">No additional members</span>';
 
@@ -356,42 +426,148 @@
         return `
           <tr class="border-b hover:bg-slate-50 align-top transition-colors">
             <td class="px-4 py-4 min-w-[150px]">
-              <div class="font-bold text-slate-900">${t.teamName}</div>
-              <div class="text-xs font-semibold text-primary mt-1 px-2 py-0.5 bg-slate-100 inline-block rounded">${t.category}</div>
+              <div class="font-bold text-slate-900">${esc(t.teamName)}</div>
+              <div class="text-xs font-semibold text-primary mt-1 px-2 py-0.5 bg-slate-100 inline-block rounded">${esc(t.category)}</div>
             </td>
             <td class="px-4 py-4 min-w-[200px]">
-              <div class="font-medium text-slate-800">${t.leaderName} <span class="font-normal text-xs text-slate-500">(${t.leaderClass})</span></div>
-              <div class="text-xs text-slate-600 mt-1">✉️ ${t.leaderEmail}</div>
-              <div class="text-xs text-slate-600">📱 ${t.whatsapp}</div>
-              <div class="text-xs text-slate-600">🚌 ${t.transport}</div>
+              <div class="font-medium text-slate-800">${esc(t.leaderName)} <span class="font-normal text-xs text-slate-500">(${esc(t.leaderClass)})</span></div>
+              <div class="text-xs text-slate-600 mt-1">✉️ ${esc(t.leaderEmail)}</div>
+              <div class="text-xs text-slate-600">📱 ${esc(t.whatsapp)}</div>
+              <div class="text-xs text-slate-600">🚌 ${esc(t.transport)}</div>
               <div class="mt-2 text-xs border-t pt-1 border-slate-200">
                 <span class="font-semibold text-slate-700">Intended Member Emails:</span><br>
-                <span class="text-slate-500">${intended || 'None'}</span>
+                <span class="text-slate-500">${esc(intended) || 'None'}</span>
               </div>
             </td>
             <td class="px-4 py-4 text-sm text-slate-700 min-w-[220px]">
               ${membersHtml}
             </td>
             <td class="px-4 py-4 min-w-[250px]">
-              <div class="text-xs font-bold text-blue-600 mb-1">${t.sdg}</div>
-              <div class="text-xs text-slate-600 leading-relaxed">${t.brief}</div>
+              <div class="text-xs font-bold text-blue-600 mb-1">${esc(t.sdg)}</div>
+              <div class="text-xs text-slate-600 leading-relaxed">${esc(t.brief)}</div>
             </td>
             <td class="px-4 py-4 text-xs text-slate-600 leading-relaxed min-w-[200px]">
-              ${t.prototype}
+              ${esc(t.prototype)}
+            </td>
+            <td class="px-4 py-4 no-print">
+              <button class="btn btn-secondary py-1 px-3 text-xs btn-edit-team" data-id="${esc(t.id)}">
+                <i data-lucide="pencil" class="w-3 h-3"></i> Edit
+              </button>
             </td>
           </tr>
         `;
       }).join('');
+      lucide.createIcons();
     }
 
-    $('dash-search').addEventListener('keyup', (e) => {
-      const q = e.target.value.toLowerCase();
-      const filtered = allTeams.filter(t => 
-        (t.teamName && t.teamName.toLowerCase().includes(q)) || 
+    function applySearch() {
+      const q = $('dash-search').value.toLowerCase();
+      const filtered = !q ? allTeams : allTeams.filter(t =>
+        (t.teamName && t.teamName.toLowerCase().includes(q)) ||
         (t.leaderName && t.leaderName.toLowerCase().includes(q)) ||
         (t.sdg && t.sdg.toLowerCase().includes(q))
       );
       renderTable(filtered);
+    }
+    $('dash-search').addEventListener('keyup', applySearch);
+
+    // ===== EDIT TEAM =====
+    $('dash-table').addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-edit-team');
+      if (btn) openEdit(btn.dataset.id);
+    });
+
+    function openEdit(teamId) {
+      const t = allTeams.find(x => x.id === teamId);
+      if (!t) return;
+      editingTeamId = teamId;
+
+      $('e-teamName').value = t.teamName || '';
+      $('e-category').value = t.category || 'Primary';
+      $('e-leaderName').value = t.leaderName || '';
+      $('e-leaderClass').value = t.leaderClass || '';
+      $('e-leaderEmail').value = t.leaderEmail || '';
+      $('e-whatsapp').value = t.whatsapp || '';
+      $('e-transport').value = t.transport || '';
+      $('e-allowed').value = (t.allowedMembers || []).join(', ');
+      $('e-sdg').value = t.sdg || '';
+      $('e-brief').value = t.brief || '';
+      $('e-prototype').value = t.prototype || '';
+
+      const members = allMembers.filter(m => m.teamId === teamId && m.role === 'Member');
+      $('e-members').innerHTML = members.map((m, i) => `
+        <div class="member-row border-b border-slate-100 pb-4 last:border-0 last:pb-0" data-id="${esc(m.id)}">
+          <div class="text-xs font-semibold text-slate-500 mb-2">Member ${i + 1}</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div><label class="modal-label">Name</label><input class="input-field" data-f="name" value="${esc(m.name)}" required></div>
+            <div><label class="modal-label">Class</label><input class="input-field" data-f="class" value="${esc(m.class)}"></div>
+            <div><label class="modal-label">Email</label><input type="email" class="input-field" data-f="email" value="${esc(m.email)}" required></div>
+            <div><label class="modal-label">WhatsApp</label><input class="input-field" data-f="whatsapp" value="${esc(m.whatsapp)}"></div>
+            <div class="md:col-span-2"><label class="modal-label">Transport</label><input class="input-field" data-f="transport" value="${esc(m.transport)}"></div>
+          </div>
+        </div>
+      `).join('') || '<p class="text-sm italic text-slate-400">No additional members have joined this team yet.</p>';
+
+      $('edit-modal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeEdit() {
+      $('edit-modal').classList.remove('open');
+      document.body.style.overflow = '';
+      editingTeamId = null;
+    }
+
+    $('btn-close-modal').addEventListener('click', closeEdit);
+    $('btn-cancel-edit').addEventListener('click', closeEdit);
+    $('edit-modal').addEventListener('mousedown', (e) => { if (e.target === $('edit-modal')) closeEdit(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && editingTeamId) closeEdit(); });
+
+    $('form-edit-team').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!editingTeamId) return;
+
+      const saveBtn = $('btn-save-edit');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
+      try {
+        const batch = writeBatch(db);
+
+        const allowed = $('e-allowed').value
+          .split(/[,\n]+/).map(s => s.trim().toLowerCase()).filter(Boolean);
+
+        batch.update(doc(db, 'teams', editingTeamId), {
+          teamName: $('e-teamName').value.trim(),
+          category: $('e-category').value,
+          leaderName: $('e-leaderName').value.trim(),
+          leaderClass: $('e-leaderClass').value.trim(),
+          leaderEmail: $('e-leaderEmail').value.trim(),
+          whatsapp: $('e-whatsapp').value.trim(),
+          transport: $('e-transport').value.trim(),
+          allowedMembers: allowed,
+          sdg: $('e-sdg').value.trim(),
+          brief: $('e-brief').value.trim(),
+          prototype: $('e-prototype').value.trim(),
+          updatedAt: new Date()
+        });
+
+        document.querySelectorAll('#e-members .member-row').forEach(row => {
+          const data = { updatedAt: new Date() };
+          row.querySelectorAll('[data-f]').forEach(inp => { data[inp.dataset.f] = inp.value.trim(); });
+          batch.update(doc(db, 'members', row.dataset.id), data);
+        });
+
+        await batch.commit();
+        toast('Team details updated');
+        closeEdit();
+      } catch (err) {
+        console.error(err);
+        toast('Could not save: ' + err.message, 'error');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save changes';
+      }
     });
   </script>
 </body>
