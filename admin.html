@@ -7,6 +7,8 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <!-- ✅ SheetJS (Excel export) -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -101,9 +103,14 @@
       <div>
         <h2 class="text-2xl font-bold text-primary">Overview & Settings</h2>
       </div>
-      <button onclick="window.print()" class="btn btn-secondary text-sm">
-        <i data-lucide="printer" class="w-4 h-4"></i> Print Report
-      </button>
+      <div class="flex gap-2">
+        <button id="btn-export-excel" class="btn btn-secondary text-sm">
+          <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export to Excel
+        </button>
+        <button onclick="window.print()" class="btn btn-secondary text-sm">
+          <i data-lucide="printer" class="w-4 h-4"></i> Print Report
+        </button>
+      </div>
     </div>
 
     <!-- Print Header -->
@@ -569,6 +576,159 @@
         saveBtn.textContent = 'Save changes';
       }
     });
+
+    /* =========================================================
+       EXCEL EXPORT
+       ========================================================= */
+
+    const xlText = v => (v === undefined || v === null) ? '' : String(v);
+
+    function xlDateTime(v) {
+      if (!v) return '';
+      try {
+        if (typeof v.toDate === 'function') return v.toDate().toLocaleString();       // Firestore Timestamp
+        if (typeof v === 'object' && typeof v.seconds === 'number') return new Date(v.seconds * 1000).toLocaleString();
+        const d = new Date(v);
+        return isNaN(d.getTime()) ? String(v) : d.toLocaleString();
+      } catch (e) { return ''; }
+    }
+
+    function exportToExcel() {
+      if (typeof XLSX === 'undefined') {
+        toast('Excel library failed to load. Check your internet connection.', 'error');
+        return;
+      }
+      if (!allTeams.length && !allMembers.length) {
+        toast('There is no data to export yet.', 'error');
+        return;
+      }
+
+      const btn = $('btn-export-excel');
+      btn.disabled = true;
+
+      try {
+        const teamMap = new Map(allTeams.map(t => [t.id, t]));
+        const wb = XLSX.utils.book_new();
+
+        /* ---------- Sheet 1: Summary ---------- */
+        const sdgCounts = {};
+        allTeams.forEach(t => {
+          const key = (t.sdg || '').trim() || 'Not specified';
+          sdgCounts[key] = (sdgCounts[key] || 0) + 1;
+        });
+
+        const summaryRows = [
+          ['Global Innovation Challenge — Registration Export'],
+          ['Generated', new Date().toLocaleString()],
+          [],
+          ['Metric', 'Value'],
+          ['Total Teams', allTeams.length],
+          ['Primary Teams', allTeams.filter(t => t.category === 'Primary').length],
+          ['High School Teams', allTeams.filter(t => t.category === 'High School').length],
+          ['Team Leaders', allTeams.length],
+          ['Additional Members', allMembers.filter(m => m.role === 'Member').length],
+          ['Total Participants', allTeams.length + allMembers.filter(m => m.role === 'Member').length],
+          [],
+          ['Teams by SDG', 'Teams']
+        ];
+        Object.entries(sdgCounts)
+          .sort((a, b) => b[1] - a[1])
+          .forEach(([sdg, count]) => summaryRows.push([sdg, count]));
+
+        const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
+        wsSummary['!cols'] = [{ wch: 42 }, { wch: 24 }];
+        XLSX.utils.book_append_sheet(wb, wsSummary, 'Summary');
+
+        /* ---------- Sheet 2: Teams ---------- */
+        const teamHeader = [
+          '#', 'Team Name', 'Category',
+          'Leader Name', 'Leader Class', 'Leader Email', 'Leader WhatsApp', 'Transport',
+          'Intended Member Emails', 'SDG', 'Brief', 'Prototype Plan',
+          'Member Count', 'Member Names', 'Registered On'
+        ];
+
+        const teamRows = allTeams.map((t, i) => {
+          const members = allMembers.filter(m => m.teamId === t.id && m.role === 'Member');
+          return [
+            i + 1,
+            xlText(t.teamName),
+            xlText(t.category),
+            xlText(t.leaderName),
+            xlText(t.leaderClass),
+            xlText(t.leaderEmail),
+            xlText(t.whatsapp),
+            xlText(t.transport),
+            (t.allowedMembers || []).join(', '),
+            xlText(t.sdg),
+            xlText(t.brief),
+            xlText(t.prototype),
+            members.length,
+            members.map(m => m.name).filter(Boolean).join(', '),
+            xlDateTime(t.createdAt)
+          ];
+        });
+
+        const wsTeams = XLSX.utils.aoa_to_sheet([teamHeader, ...teamRows]);
+        wsTeams['!cols'] = [
+          { wch: 5 },  { wch: 26 }, { wch: 14 },
+          { wch: 22 }, { wch: 12 }, { wch: 28 }, { wch: 18 }, { wch: 24 },
+          { wch: 32 }, { wch: 26 }, { wch: 60 }, { wch: 60 },
+          { wch: 12 }, { wch: 34 }, { wch: 22 }
+        ];
+        wsTeams['!autofilter'] = {
+          ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: Math.max(teamRows.length, 1), c: teamHeader.length - 1 } })
+        };
+        XLSX.utils.book_append_sheet(wb, wsTeams, 'Teams');
+
+        /* ---------- Sheet 3: Members ---------- */
+        const memberHeader = [
+          '#', 'Team Name', 'Category', 'Role',
+          'Name', 'Class', 'Email', 'WhatsApp', 'Transport',
+          'Team Leader', 'Leader Email', 'Registered On'
+        ];
+
+        const memberRows = allMembers.map((m, i) => {
+          const t = teamMap.get(m.teamId);
+          return [
+            i + 1,
+            t ? xlText(t.teamName) : '(unknown team)',
+            t ? xlText(t.category) : '',
+            xlText(m.role || 'Member'),
+            xlText(m.name),
+            xlText(m.class),
+            xlText(m.email),
+            xlText(m.whatsapp),
+            xlText(m.transport),
+            t ? xlText(t.leaderName) : '',
+            t ? xlText(t.leaderEmail) : '',
+            xlDateTime(m.createdAt)
+          ];
+        });
+
+        const wsMembers = XLSX.utils.aoa_to_sheet([memberHeader, ...memberRows]);
+        wsMembers['!cols'] = [
+          { wch: 5 },  { wch: 26 }, { wch: 14 }, { wch: 12 },
+          { wch: 22 }, { wch: 12 }, { wch: 28 }, { wch: 18 }, { wch: 24 },
+          { wch: 22 }, { wch: 28 }, { wch: 22 }
+        ];
+        wsMembers['!autofilter'] = {
+          ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: Math.max(memberRows.length, 1), c: memberHeader.length - 1 } })
+        };
+        XLSX.utils.book_append_sheet(wb, wsMembers, 'Members');
+
+        /* ---------- Write file ---------- */
+        const stamp = new Date().toISOString().slice(0, 10);
+        XLSX.writeFile(wb, `GIC-Registrations-${stamp}.xlsx`);
+        toast('Excel file downloaded');
+      } catch (err) {
+        console.error(err);
+        toast('Export failed: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    $('btn-export-excel').addEventListener('click', exportToExcel);
   </script>
 </body>
 </html>
